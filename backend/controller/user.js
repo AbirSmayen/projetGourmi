@@ -5,26 +5,26 @@ const jwt=require("jsonwebtoken")
 const userSignUp=async(req,res)=>{
     const {email,password}=req.body
     if(!email || !password){
-        return res.status(400).json({message:"Emailand password is required"})
+        return res.status(400).json({ message:"Email and password is required"})
     }
-    let user=await User.findOne({email})
+    let user = await User.findOne({email})
     if(user){
-        return res.status(400).json({message:"Email is already exist"})
+        return res.status(400).json({ error:"Email is already exist"})
     }
     const hashPwd=await bcrypt.hash(password,10)
     const newUser=await User.create({
-        email,password:hashPwd
+        email,password: hashPwd
     })
-    let token=jwt.sign({email,id:newUser._id},process.env.SECRET_KEY)
-    return res.status(200).json({token,newUser})
+    let token = jwt.sign({email, id: newUser._id},process.env.SECRET_KEY)
+    return res.status(200).json({token, user:newUser})
 }
 
 const userLogin=async(req,res)=>{
     const {email,password}=req.body
     if(!email || !password){
-        return res.status(400).json({message:"Emailand password is required"})
+        return res.status(400).json({message:"Email and password is required"})
     }
-    let user=await User.findOne({email}) //vérifie si l'user existe
+    let user=await User.findOne({email}) //vérifie si l'user existe ou non
     if(user && await bcrypt.compare(password,user.password)){
             let token=jwt.sign({email,id:user._id},process.env.SECRET_KEY)
             return res.status(200).json({token,user})
