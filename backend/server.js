@@ -13,6 +13,8 @@ app.use(express.json());
 connectDb();
 
 app.use("/recipe", require("./routes/recipe"));
+app.use("/", require("./routes/user"));
+
 
 app.listen(PORT, (err) => {
   if (err) console.error("Erreur serveur :", err);
