@@ -21,6 +21,11 @@ const recipeSchema=mongoose.Schema({
         type:String,
        
     },
+// pour stoker l'id de l'utilisateur qui a créer la recette
+    createdBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"  
+    }
 },{timestamps:true})
 
 module.exports=mongoose.model("Recipes", recipeSchema)
