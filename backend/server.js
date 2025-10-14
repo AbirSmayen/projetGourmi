@@ -11,6 +11,7 @@ app.use(cors({ origin: "http://localhost:5173" }));
 
 app.use(express.json());
 connectDb();
+app.use(express.static("public"))
 
 app.use("/recipe", require("./routes/recipe"));
 app.use("/", require("./routes/user"));
