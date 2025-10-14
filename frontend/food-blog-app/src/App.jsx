@@ -4,6 +4,7 @@ import {createBrowserRouter,RouterProvider} from "react-router-dom"
 import Home from "./pages/Home";
 import MainNavigation from "./components/MainNavigation";
 import axios from 'axios'
+import AddfoodRecipe from "./pages/AddfoodRecipe";
 
 //Récupérer les données de la BD: nous néfinier les méthodes nécessaires
 const getAllRecipes = async () => {
@@ -21,6 +22,7 @@ const router=createBrowserRouter([
       {path:"/",element:<Home/>,loader:getAllRecipes}, // je met l'element que je souhaite affiché : affiche le composant Home
       {path:"/myRecipe",element:<Home/>},
       {path:"/favRecipe",element:<Home/>},
+      {path:"/addRecipe",element:<AddfoodRecipe/>},
 
   ]},
 ])

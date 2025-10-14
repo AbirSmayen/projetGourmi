@@ -1,9 +1,11 @@
 import React from "react"
 import foodRecipe from '../assets/foodRecipe.png'
 import RecipeItems from "../components/RecipeItems"
+import { useNavigate } from "react-router-dom"
 
 
 export default function Home(){
+  const navigate=useNavigate()
   return (
     <>
     <section className='home'>
@@ -12,7 +14,7 @@ export default function Home(){
         <h5>At Food Recipe, we believe that healthy eating doesn’t have to be boring. 
 Explore our collection of balanced meals, made with natural ingredients and bursting with flavor, 
 to help you nourish your body and delight your taste buds.</h5>
-        <button>Share your recipe</button>
+        <button onClick={()=>navigate("/addRecipe")}>Share your recipe</button>
       </div>
       <div className="right">
         <img src={foodRecipe} width="320px" height="300px"></img>
