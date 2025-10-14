@@ -7,6 +7,7 @@ import axios from 'axios'
 import AddfoodRecipe from "./pages/AddfoodRecipe";
 
 //Récupérer les données de la BD: nous néfinier les méthodes nécessaires
+//getAllRecipes renvoie toutes les recettes
 const getAllRecipes = async () => {
   try {
     const res = await axios.get(`http://localhost:5000/recipe`)
@@ -17,10 +18,18 @@ const getAllRecipes = async () => {
   }
 }
 
+const getMyRecipes=async()=>{
+  //on récupère les données de l'utilisateur à partir du stockage local
+  let user=JSON.parse(localStorage.getItem("user"))
+  let allRecipes=await getAllRecipes()
+  //on filtre les recettes en fonction de l'utilisateur connecté actuel 
+  return allRecipes.filter(item=>item.createdBy===user._id)
+}
+
 const router=createBrowserRouter([
   {path:"/",element:<MainNavigation/>,children:[
       {path:"/",element:<Home/>,loader:getAllRecipes}, // je met l'element que je souhaite affiché : affiche le composant Home
-      {path:"/myRecipe",element:<Home/>},
+      {path:"/myRecipe",element:<Home/>,loader:getMyRecipes},
       {path:"/favRecipe",element:<Home/>},
       {path:"/addRecipe",element:<AddfoodRecipe/>},
 

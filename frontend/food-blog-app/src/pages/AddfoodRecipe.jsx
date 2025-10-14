@@ -17,10 +17,12 @@ export default function AddfoodRecipe(){
         console.log(recipeData)
         await axios.post("http://localhost:5000/recipe",recipeData,{
             headers:{
-                'Content-Type':'multipart/form-data'
+                'Content-Type':'multipart/form-data',
+                //Entete d'autorisation
+                'authorization':'bearer ' + localStorage.getItem("token")
             }
         })
-        .then(()=>navigate("/"))
+            .then(() => navigate("/"))
     }
   return (
     <>
