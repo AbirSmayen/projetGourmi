@@ -43,8 +43,8 @@ const editRecipe=async(req,res)=>{
     let recipe=await Recipes.findById(req.params.id)
     try{
             if(recipe) //si recette existe 
-    {
-        await Recipes.findByIdAndUpdate(req.params.id,req.body,{new:true})
+    {   let coverImage=req.file?.filename ? req.file?.filename : recipe.coverImage
+        await Recipes.findByIdAndUpdate(req.params.id,{...req.body,coverImage},{new:true})
         res.json({title, ingredients,instructions,time})
     }  
     }
@@ -55,8 +55,14 @@ const editRecipe=async(req,res)=>{
 
 }
 
-const deleteRecipe=(req,res)=>{
-
+const deleteRecipe=async(req,res)=>{
+    try{
+        await Recipes.deleteOne({_id:req.params.id})
+        res.json({status:"ok"})
+    }
+    catch(err){
+        return res.status(400).json({message:"error"})
+    }
 }
 
 module.exports={getRecipes, getRecipe, addRecipe, editRecipe,deleteRecipe,upload} //on exporte la fonction getRecipe pour pouvoir l'utiliser dans d'autres fichiers
