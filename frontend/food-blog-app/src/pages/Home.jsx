@@ -1,5 +1,5 @@
 import React from "react"
-import foodRecipe from '../assets/foodRecipe.png'
+import foodRecipe from '../assets/foodRecipe.jpg'
 import RecipeItems from "../components/RecipeItems"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
@@ -28,9 +28,8 @@ export default function Home(){
     <section className='home'>
       <div className="left">
         <h1>Food Recipe</h1>
-        <h5>At Food Recipe, we believe that healthy eating doesn’t have to be boring. 
-Explore our collection of balanced meals, made with natural ingredients and bursting with flavor, 
-to help you nourish your body and delight your taste buds.</h5>
+        <h5>Share your culinary creations, discover amazing recipes from food lovers around the world, and build a community united by the love of great food.
+        </h5>
         <button onClick={addRecipe}>Share your recipe</button>
       </div>
       <div className="right">
@@ -43,7 +42,8 @@ to help you nourish your body and delight your taste buds.</h5>
   {(isOpen) && <Modal onClose={()=>setIsOpen(false)}><InputForm setIsOpen={()=>setIsOpen(false)}/></Modal>}
 
     <div className='recipe'>
-        <RecipeItems/>
+        <RecipeItems openLogin={setIsOpen} />
+
     </div>
     </>
   )

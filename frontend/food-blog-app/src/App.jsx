@@ -6,6 +6,8 @@ import MainNavigation from "./components/MainNavigation";
 import axios from 'axios'
 import AddfoodRecipe from "./pages/AddfoodRecipe";
 import EditRecipe from "./pages/EditRecipe";
+import RecipeDetails from "./pages/RecipeDetails";
+
 
 //Récupérer les données de la BD: nous néfinier les méthodes nécessaires
 //getAllRecipes renvoie toutes les recettes
@@ -35,9 +37,10 @@ const router=createBrowserRouter([
   {path:"/",element:<MainNavigation/>,children:[
       {path:"/",element:<Home/>,loader:getAllRecipes}, // je met l'element que je souhaite affiché : affiche le composant Home
       {path:"/myRecipe",element:<Home/>,loader:getMyRecipes},
-      {path:"/favRecipe",element:<Home/>,loader:getFavRecipes},
       {path:"/addRecipe",element:<AddfoodRecipe/>},
       {path:"/editRecipe/:id",element:<EditRecipe/>},
+      {path:"/recipe/:id", element:<RecipeDetails/>},
+
 
   ]},
 ])

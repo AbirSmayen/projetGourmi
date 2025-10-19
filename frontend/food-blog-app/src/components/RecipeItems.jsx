@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { Link, useLoaderData } from "react-router-dom"
-import foodImg from '../assets/foodRecipe.png'
 import { IoTimeOutline } from "react-icons/io5";
-import { FaHeart } from "react-icons/fa6";
 import { CiEdit } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import axios from "axios";
@@ -15,9 +13,6 @@ const recipes=useLoaderData()
 const [allRecipes,setAllRecipes]=useState()
 let path=window.location.pathname === "/myRecipe" ? true :false
 
-//la liste des éléments favories
-let favItems=JSON.parse(localStorage.getItem("fav")) ?? []
-const [isFavRecipe, setIsFavRecipe]=useState(false)
 console.log(allRecipes)
 
 useEffect(()=>{
@@ -29,16 +24,6 @@ const onDelete=async(id)=>{
     await axios.delete(`http://localhost:5000/recipe/${id}`)
             .then((res)=>console.log(res))
     setAllRecipes(recipes=>recipes.filter(recipe=>recipe._id !== id))
-    let filterItem = favItems.filter(recipe=>recipe._id !== id)
-    localStorage.setItem("fav",JSON.stringify(filterItem))
-
-}
-
-const favRecipe=(item)=>{
-    let filterItem=favItems.filter(recipe=>recipe._id !== item._id)
-    favItems=favItems.filter(recipe=>recipe._id === item._id).length===0 ?[...favItems,item] : favItems.filter()
-    localStorage.setItem("fav",JSON.stringify(favItems))
-    setIsFavRecipe(pre=>!pre)
 }
 
   return (
@@ -48,20 +33,21 @@ const favRecipe=(item)=>{
             allRecipes?.map((item, index) => {
                 return (
                     <div key={index} className="card">
-                        <img src={`http://localhost:5000/images/${item.coverImage}`} width="120px" height="100px"></img>
-                        <div className="card-body">
-                            <div className="title">{item.title}</div>
-                            <div className="icons">
-                                <div className="timer"><IoTimeOutline />{item.time}</div>
-                                {(!path) ? <FaHeart  onClick={()=>favRecipe(item)}
-                                    style={{color:(favItems.some(res=>res._id === item._id)) ? "red" : ""}}/> :
-                                    <div className="action">
-                                        <Link to={`/editRecipe/${item._id}`} className="editIcon"><CiEdit /></Link>
-                                        <MdDelete onClick={()=>onDelete(item._id)} className="deleteIcon"/>
-                                    </div>
-                                }
+                        <Link to={`/recipe/${item._id}`} className="card-link">
+                            <img src={`http://localhost:5000/images/${item.coverImage}`} width="120px" height="100px"></img>
+                            <div className="card-body">
+                                <div className="title">{item.title}</div>
+                                <div className="icons">
+                                    <div className="timer"><IoTimeOutline />{item.time}</div>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
+                        {path && 
+                            <div className="action">
+                                <Link to={`/editRecipe/${item._id}`} className="editIcon"><CiEdit /></Link>
+                                <MdDelete onClick={()=>onDelete(item._id)} className="deleteIcon"/>
+                            </div>
+                        }
                     </div>
                 )
             })
