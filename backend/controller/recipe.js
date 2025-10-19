@@ -18,10 +18,11 @@ const getRecipes=async(req,res)=>{
     return res.json(recipes)
 }
 
-const getRecipe=async(req,res)=>{
-    const recipe=await Recipes.findById(req.params.id)
-    res.json(recipe)
+const getRecipe = async (req, res) => {
+    const recipe = await Recipes.findById(req.params.id).populate("createdBy", "name email");  //.populate() pour récupérer les infos du créateur (User).
+    res.json(recipe);
 }
+
 
 const addRecipe=async(req,res)=>{
     console.log(req.user)
