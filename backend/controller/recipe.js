@@ -19,51 +19,137 @@ const getRecipes=async(req,res)=>{
 }
 
 const getRecipe = async (req, res) => {
-    const recipe = await Recipes.findById(req.params.id).populate("createdBy", "name email");  //.populate() pour récupérer les infos du créateur (User).
-    res.json(recipe);
+    try {
+        const recipe = await Recipes.findById(req.params.id).populate("createdBy", "name email");
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" })
+        }
+        res.json(recipe);
+    } catch (err) {
+        console.error("Error fetching recipe:", err)
+        return res.status(500).json({ message: "Error fetching recipe" })
+    }
 }
 
-
-const addRecipe=async(req,res)=>{
+const addRecipe = async(req, res) => {
     console.log(req.user)
-    const {title, ingredients,instructions,time}=req.body
+    const {title, ingredients, instructions, time} = req.body
 
     if(!title || !ingredients || !instructions){
-        res.json({message:"Required fields can't be empty"})
+        return res.json({message: "Required fields can't be empty"})
     }
 
-    const newRecipe=await Recipes.create({
-        title,ingredients,instructions,time,coverImage:req.file.filename,
-        createdBy:req.user.id
+    // Transformer la chaîne d'ingrédients en tableau
+    let ingredientsArray = ingredients
+    if (typeof ingredients === 'string') {
+        ingredientsArray = ingredients.split(',').map(item => item.trim())
+    }
+
+    const newRecipe = await Recipes.create({
+        title,
+        ingredients: ingredientsArray,
+        instructions,
+        time,
+        coverImage: req.file.filename,
+        createdBy: req.user.id
     })
     return res.json(newRecipe)
 }
 
-const editRecipe=async(req,res)=>{
-    const {title, ingredients,instructions,time}=req.body
-    let recipe=await Recipes.findById(req.params.id)
-    try{
-            if(recipe) //si recette existe 
-    {   let coverImage=req.file?.filename ? req.file?.filename : recipe.coverImage
-        await Recipes.findByIdAndUpdate(req.params.id,{...req.body,coverImage},{new:true})
-        res.json({title, ingredients,instructions,time})
-    }  
-    }
-    catch(err){
-        return res.status(404).json({message:"Error"})
-    }
- 
+// Fonction editRecipe 
+const editRecipe = async(req, res) => {
+    try {
+        const {title, ingredients, instructions, time} = req.body
+        
+        // Vérifier si la recette existe
+        let recipe = await Recipes.findById(req.params.id)
+        
+        if (!recipe) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Recipe not found" 
+            })
+        }
 
+        // Vérifier si l'utilisateur est le propriétaire
+        if (recipe.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({ 
+                success: false, 
+                message: "Not authorized to edit this recipe" 
+            })
+        }
+
+        // Transformer les ingrédients en tableau si c'est une chaîne
+        let ingredientsArray = ingredients
+        if (typeof ingredients === 'string') {
+            ingredientsArray = ingredients.split(',').map(item => item.trim())
+        }
+
+        // Gérer l'image : garder l'ancienne si aucune nouvelle n'est fournie
+        let coverImage = req.file?.filename || recipe.coverImage
+
+        // Mettre à jour la recette
+        const updatedRecipe = await Recipes.findByIdAndUpdate(
+            req.params.id,
+            {
+                title,
+                ingredients: ingredientsArray,
+                instructions,
+                time,
+                coverImage
+            },
+            { new: true }
+        )
+
+        return res.json({ 
+            success: true,
+            message: "Recipe updated successfully",
+            recipe: updatedRecipe
+        })
+        
+    } catch(err) {
+        console.error("Error updating recipe:", err)
+        return res.status(500).json({ 
+            success: false, 
+            message: "Error updating recipe: " + err.message 
+        })
+    }
 }
 
-const deleteRecipe=async(req,res)=>{
-    try{
-        await Recipes.deleteOne({_id:req.params.id})
-        res.json({status:"ok"})
-    }
-    catch(err){
-        return res.status(400).json({message:"error"})
+const deleteRecipe = async(req, res) => {
+    try {
+        const recipe = await Recipes.findById(req.params.id)
+        
+        if (!recipe) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Recipe not found" 
+            })
+        }
+
+        await Recipes.deleteOne({ _id: req.params.id })
+        
+        return res.json({ 
+            success: true,
+            status: "ok",
+            message: "Recipe deleted successfully" 
+        })
+    } catch(err) {
+        console.error(err)
+        return res.status(400).json({ 
+            success: false,
+            message: "Error deleting recipe" 
+        })
     }
 }
 
-module.exports={getRecipes, getRecipe, addRecipe, editRecipe,deleteRecipe,upload} //on exporte la fonction getRecipe pour pouvoir l'utiliser dans d'autres fichiers
+const getMyRecipes = async (req, res) => {
+    try {
+        const recipes = await Recipes.find({ createdBy: req.user.id })
+        return res.json(recipes)
+    } catch (err) {
+        return res.status(500).json({ message: "Error fetching user recipes" })
+    }
+}
+
+module.exports={getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, getMyRecipes, upload}
