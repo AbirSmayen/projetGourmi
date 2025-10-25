@@ -1,5 +1,4 @@
 import React from "react"
-import './App.css'
 import {createBrowserRouter,RouterProvider} from "react-router-dom"
 import Home from "./pages/Home";
 import MainNavigation from "./components/MainNavigation";
@@ -29,9 +28,6 @@ const getMyRecipes=async()=>{
   return allRecipes.filter(item=>item.createdBy===user._id)
 }
 
-const getFavRecipes=()=>{
-  return JSON.parse(localStorage.getItem("fav"))
-}
 
 const router=createBrowserRouter([
   {path:"/",element:<MainNavigation/>,children:[
