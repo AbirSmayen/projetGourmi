@@ -83,7 +83,7 @@ export default function Home(){
 
     if (result.isConfirmed) {
       try {
-        const response = await axios.delete(`http://localhost:5000/recipe/${id}`, {
+        const response = await axios.delete(`http://localhost:5000/api/recipes/${id}`, {
           headers: {
             'authorization': 'bearer ' + localStorage.getItem("token")
           }

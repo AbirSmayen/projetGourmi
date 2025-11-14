@@ -14,7 +14,6 @@ export default function RecipeDetails() {
       console.log("Fetching recipe with ID:", id)
       setLoading(true)
       setError(null)
-
       try {
         const res = await axios.get(`http://localhost:5000/api/recipes/${id}`)
         console.log("Recipe data:", res.data)
@@ -41,6 +40,26 @@ export default function RecipeDetails() {
       return ingredients.split(',').map(item => item.trim())
     }
     return []
+  }
+
+  // Fonction pour obtenir le nom complet de l'utilisateur
+  const getUserFullName = (createdBy) => {
+    if (!createdBy) return "Utilisateur anonyme"
+    
+    const firstName = createdBy.firstName || ""
+    const lastName = createdBy.lastName || ""
+    
+    // Si les deux sont disponibles
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`
+    }
+    
+    // Si seulement un des deux est disponible
+    if (firstName) return firstName
+    if (lastName) return lastName
+    
+    // Sinon utiliser l'email
+    return createdBy.email || "Utilisateur anonyme"
   }
 
   if (loading) {
@@ -89,14 +108,13 @@ export default function RecipeDetails() {
           <h2 style={{ fontWeight: "bold", fontSize: "2.2rem" }}>
             {recipe.title}
           </h2>
-
           <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
             <span className="badge bg-primary" style={{ fontSize: '1rem', padding: '0.5rem 1rem' }}>
               ⏱️ {recipe.time}
             </span>
             {recipe.createdBy && (
               <span className="badge bg-secondary" style={{ fontSize: '1rem', padding: '0.5rem 1rem' }}>
-                👤 {recipe.createdBy.name || recipe.createdBy.email}
+                👤 {getUserFullName(recipe.createdBy)}
               </span>
             )}
           </div>
@@ -128,11 +146,7 @@ export default function RecipeDetails() {
                 <h3 className="card-title mb-4" style={{ color: '#ce1212' }}>
                   🛒 Ingredients
                 </h3>
-                <ul style={{
-                  listStyle: 'none',
-                  padding: 0,
-                  fontSize: '16px'
-                }}>
+                <ul style={{ listStyle: 'none', padding: 0, fontSize: '16px' }}>
                   {ingredientsArray.map((ing, i) => (
                     <li
                       key={i}
@@ -143,12 +157,14 @@ export default function RecipeDetails() {
                         lineHeight: '1.6'
                       }}
                     >
-                      <span style={{
-                        position: 'absolute',
-                        left: 0,
-                        color: '#28a745',
-                        fontSize: '18px'
-                      }}>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          color: '#28a745',
+                          fontSize: '18px'
+                        }}
+                      >
                         ✓
                       </span>
                       {ing}
@@ -166,11 +182,7 @@ export default function RecipeDetails() {
                 <h3 className="card-title mb-4" style={{ color: '#ce1212' }}>
                   📝 Instructions
                 </h3>
-                <div style={{
-                  whiteSpace: 'pre-line',
-                  lineHeight: '1.8',
-                  fontSize: '16px'
-                }}>
+                <div style={{ whiteSpace: 'pre-line', lineHeight: '1.8', fontSize: '16px' }}>
                   {recipe.instructions}
                 </div>
               </div>
