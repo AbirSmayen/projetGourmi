@@ -3,9 +3,8 @@ const router = express.Router();
 const User = require("../../models/user");
 const bcrypt = require("bcrypt");
 
-// ========== GESTION DES UTILISATEURS ==========
 
-// GET - Récupérer tous les utilisateurs
+// Récupérer tous les utilisateurs
 router.get("/", async (req, res) => {
   try {
     const users = await User.find()
@@ -26,7 +25,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - Récupérer un utilisateur par ID
+// Récupérer un utilisateur par ID
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -51,7 +50,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST - Ajouter un nouvel utilisateur (par l'admin)
+// Ajouter un nouvel utilisateur (par l'admin)
 router.post("/", async (req, res) => {
   try {
     const { firstName, lastName, email, password, image } = req.body;
@@ -96,7 +95,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT - Modifier un utilisateur
+// Modifier un utilisateur
 router.put("/:id", async (req, res) => {
   try {
     const { firstName, lastName, email, password, image } = req.body;
@@ -141,7 +140,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE - Supprimer un utilisateur
+// Supprimer un utilisateur
 router.delete("/:id", async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);

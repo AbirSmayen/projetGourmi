@@ -3,9 +3,8 @@ const router = express.Router();
 const User = require("../../models/user");
 const Recipe = require("../../models/recipe");
 
-// ========== STATISTIQUES GÉNÉRALES ==========
 
-// GET - Statistiques globales du dashboard
+// Statistiques globales du dashboard
 router.get("/", async (req, res) => {
   try {
     // Compter les utilisateurs
@@ -52,7 +51,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - Statistiques des utilisateurs
+// Statistiques des utilisateurs
 router.get("/users", async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();

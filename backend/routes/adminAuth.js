@@ -1,4 +1,3 @@
-// routes/adminAuth.js
 const express = require("express");
 const router = express.Router();
 const { adminSignUp, adminLogin } = require("../controller/adminAuth");

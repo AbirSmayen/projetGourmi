@@ -20,7 +20,7 @@ const getRecipes=async(req,res)=>{
 
 const getRecipe = async (req, res) => {
     try {
-        const recipe = await Recipes.findById(req.params.id).populate("createdBy", "name email");
+        const recipe = await Recipes.findById(req.params.id).populate("createdBy", "firstName lastName");
         if (!recipe) {
             return res.status(404).json({ message: "Recipe not found" })
         }

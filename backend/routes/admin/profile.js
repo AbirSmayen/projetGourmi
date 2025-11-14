@@ -1,10 +1,9 @@
-// backend/routes/admin/profile.js
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../../models/user");
 
-// GET - Obtenir les infos du profil admin
+// Obtenir les infos du profil admin
 router.get("/", async (req, res) => {
   try {
     const admin = await User.findById(req.user.id).select("-password");
@@ -18,7 +17,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PUT - Modifier l'email
+// Modifier l'email
 router.put("/email", async (req, res) => {
   try {
     const { newEmail } = req.body;
@@ -46,7 +45,7 @@ router.put("/email", async (req, res) => {
   }
 });
 
-// PUT - Changer le mot de passe
+// Changer le mot de passe
 router.put("/password", async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;

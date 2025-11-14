@@ -1,4 +1,3 @@
-// backend/scripts/initAdmin.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const readline = require("readline");
