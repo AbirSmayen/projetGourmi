@@ -24,10 +24,10 @@ const Dashboard = () => {
   return (
     <div className="container-fluid">
       {/* Titre principal */}
-      <h1 className="h3 mb-4 text-gray-800">Tableau de bord administrateur</h1>
+      <h1 className="h3 mb-4 text-gray-800">Dashboard Admin</h1>
 
       {loading ? (
-        <p>Chargement des statistiques...</p>
+        <p>Loading statistics...</p>
       ) : stats ? (
         <div className="row">
           {/* Card Utilisateurs Totaux */}
@@ -37,13 +37,13 @@ const Dashboard = () => {
                 <div className="row no-gutters align-items-center">
                   <div className="col mr-2">
                     <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                      Utilisateurs
+                      Users
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
                       {stats.users.total}
                     </div>
                     <div className="text-xs text-muted mt-1">
-                      +{stats.users.recent} ce mois
+                      +{stats.users.recent} this month
                     </div>
                   </div>
                   <div className="col-auto">
@@ -61,13 +61,13 @@ const Dashboard = () => {
                 <div className="row no-gutters align-items-center">
                   <div className="col mr-2">
                     <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
-                      Recettes Totales
+                      Total Recipes
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
                       {stats.recipes.total}
                     </div>
                     <div className="text-xs text-muted mt-1">
-                      +{stats.recipes.recent} ce mois
+                      +{stats.recipes.recent} this month
                     </div>
                   </div>
                   <div className="col-auto">
@@ -85,7 +85,7 @@ const Dashboard = () => {
                 <div className="row no-gutters align-items-center">
                   <div className="col mr-2">
                     <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
-                      Recettes Officielles
+                      Official Recipes
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
                       {stats.recipes.official}
@@ -106,7 +106,7 @@ const Dashboard = () => {
                 <div className="row no-gutters align-items-center">
                   <div className="col mr-2">
                     <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                      Recettes Utilisateurs
+                      User Recipes
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
                       {stats.recipes.user}
@@ -121,7 +121,7 @@ const Dashboard = () => {
           </div>
         </div>
       ) : (
-        <p className="text-danger">Erreur lors du chargement des statistiques</p>
+        <p className="text-danger">Error loading statistics</p>
       )}
 
       

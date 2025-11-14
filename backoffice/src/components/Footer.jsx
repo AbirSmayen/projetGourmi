@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container my-auto">
         <div className="copyright text-center my-auto">
           <span>
-            © {new Date().getFullYear()} Gourmi Admin Dashboard — Tous droits réservés.
+            © {new Date().getFullYear()} Gourmi Admin Dashboard — All rights reserved.
           </span>
         </div>
       </div>

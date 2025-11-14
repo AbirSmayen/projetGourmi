@@ -22,20 +22,20 @@ const Statistics = () => {
     }
   };
 
-  if (loading) return <div className="container-fluid"><p>Chargement...</p></div>;
-  if (!stats) return <div className="container-fluid"><p>Erreur de chargement</p></div>;
+  if (loading) return <div className="container-fluid"><p>Loading...</p></div>;
+  if (!stats) return <div className="container-fluid"><p>Loading Error</p></div>;
 
   // Préparer les données pour le graphique
   const chartData = [
-    { label: "Utilisateurs", value: stats.users.total },
-    { label: "Recettes totales", value: stats.recipes.total },
-    { label: "Recettes officielles", value: stats.recipes.official },
-    { label: "Recettes utilisateurs", value: stats.recipes.user },
+    { label: "Users", value: stats.users.total },
+    { label: "Total Recipes", value: stats.recipes.total },
+    { label: "Official Recipes", value: stats.recipes.official },
+    { label: "User Recipes", value: stats.recipes.user },
   ];
 
   return (
     <div className="container-fluid">
-      <h1 className="h3 mb-4 text-gray-800">Statistiques</h1>
+      <h1 className="h3 mb-4 text-gray-800">Statistics</h1>
 
       {/* Cards statistiques */}
       <div className="row mb-4">
@@ -45,13 +45,13 @@ const Statistics = () => {
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                    Utilisateurs totaux
+                    Total Users
                   </div>
                   <div className="h5 mb-0 font-weight-bold text-gray-800">
                     {stats.users.total}
                   </div>
                   <div className="text-xs text-muted mt-1">
-                    +{stats.users.recent} ce mois
+                    +{stats.users.recent} this month
                   </div>
                 </div>
                 <div className="col-auto">
@@ -68,13 +68,13 @@ const Statistics = () => {
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
                   <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
-                    Recettes totales
+                    Total Recipes
                   </div>
                   <div className="h5 mb-0 font-weight-bold text-gray-800">
                     {stats.recipes.total}
                   </div>
                   <div className="text-xs text-muted mt-1">
-                    +{stats.recipes.recent} ce mois
+                    +{stats.recipes.recent} this month
                   </div>
                 </div>
                 <div className="col-auto">
@@ -89,7 +89,7 @@ const Statistics = () => {
       {/* Graphique */}
       <div className="card shadow mb-4">
         <div className="card-header py-3">
-          <h6 className="m-0 font-weight-bold text-primary">Vue d'ensemble</h6>
+          <h6 className="m-0 font-weight-bold text-primary">Overview</h6>
         </div>
         <div className="card-body">
           <ResponsiveContainer width="100%" height={300}>

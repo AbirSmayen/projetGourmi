@@ -14,22 +14,22 @@ const Sidebar = () => (
     </li>
     <li className="nav-item">
       <Link className="nav-link" to="/users">
-        <span>Utilisateurs</span>
+        <span>Users</span>
       </Link>
     </li>
     <li className="nav-item">
       <Link className="nav-link" to="/recipes">
-        <span>Recettes</span>
+        <span>Recipes</span>
       </Link>
     </li>
     <li className="nav-item">
       <Link className="nav-link" to="/official-recipes">
-        <span>Recettes officielles</span>
+        <span>Official recipes</span>
       </Link>
     </li>
     <li className="nav-item">
       <Link className="nav-link" to="/stats">
-        <span>Statistiques</span>
+        <span>Statistics</span>
       </Link>
     </li>
   </ul>

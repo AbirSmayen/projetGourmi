@@ -56,12 +56,12 @@ const AdminLogin = () => {
                        alignItems: "center",
                        justifyContent: "center",
                        color: "white",
-                       borderRadius: "0.35rem 0 0 0.35rem"
+                       borderRadius: "0.35rem 0 0 0.35rem",
                      }}>
                   <div className="text-center p-4">
                     <i className="fas fa-user-shield fa-4x mb-4"></i>
                     <h3 className="font-weight-bold">ADMIN</h3>
-                    <p className="lead mb-0">Espace Administrateur</p>
+                    <p className="lead mb-0">Administrator Area</p>
                   </div>
                 </div>
 
@@ -70,7 +70,7 @@ const AdminLogin = () => {
                   <div className="p-5">
                     <div className="text-center">
                       <h1 className="h4 text-gray-900 mb-4">
-                        Connexion Administrateur
+                        Administrator Login
                       </h1>
                     </div>
 
@@ -87,7 +87,7 @@ const AdminLogin = () => {
                           type="email"
                           name="email"
                           className="form-control form-control-user"
-                          placeholder="Adresse email"
+                          placeholder="E-mail address"
                           value={formData.email}
                           onChange={handleChange}
                           required
@@ -99,7 +99,7 @@ const AdminLogin = () => {
                           type="password"
                           name="password"
                           className="form-control form-control-user"
-                          placeholder="Mot de passe"
+                          placeholder="password"
                           value={formData.password}
                           onChange={handleChange}
                           required
@@ -114,10 +114,10 @@ const AdminLogin = () => {
                         {loading ? (
                           <>
                             <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                            Connexion en cours...
+                            Connection in progress...
                           </>
                         ) : (
-                          "Se connecter"
+                          "Login"
                         )}
                       </button>
                     </form>
@@ -126,7 +126,7 @@ const AdminLogin = () => {
 
                     <div className="text-center mt-2">
                       <small className="text-muted">
-                        Accès réservé aux administrateurs uniquement
+                        Access restricted to administrators only
                       </small>
                     </div>
                   </div>

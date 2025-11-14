@@ -79,7 +79,7 @@ const Recipes = () => {
       <div className="container-fluid">
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
           <div className="spinner-border text-primary" role="status">
-            <span className="sr-only">Chargement...</span>
+            <span className="sr-only">Loading...</span>
           </div>
         </div>
       </div>
@@ -88,12 +88,12 @@ const Recipes = () => {
 
   return (
     <div className="container-fluid">
-      <h1 className="h3 mb-4 text-gray-800">Modération des recettes</h1>
+      <h1 className="h3 mb-4 text-gray-800">Recipe Moderation</h1>
       
       <div className="card shadow mb-4">
         <div className="card-header py-3 d-flex justify-content-between align-items-center">
           <h6 className="m-0 font-weight-bold text-primary">
-            Liste des recettes ({filteredRecipes.length})
+            Recipe List ({filteredRecipes.length})
           </h6>
           <div className="input-group" style={{ width: "300px" }}>
             <input
@@ -115,11 +115,11 @@ const Recipes = () => {
             <table className="table table-bordered table-hover" width="100%" cellSpacing="0">
               <thead>
                 <tr>
-                  <th>Titre</th>
-                  <th>Auteur</th>
-                  <th>Temps</th>
-                  <th>Statut</th>
-                  <th>Date de création</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                  <th>Creation Date</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -135,11 +135,11 @@ const Recipes = () => {
                       <td>
                         {r.isOfficial ? (
                           <span className="badge badge-success">
-                            <i className="fas fa-check-circle"></i> Officielle
+                            <i className="fas fa-check-circle"></i> Official
                           </span>
                         ) : (
                           <span className="badge badge-warning">
-                            <i className="fas fa-clock"></i> Utilisateur
+                            <i className="fas fa-clock"></i> User
                           </span>
                         )}
                       </td>
@@ -154,11 +154,11 @@ const Recipes = () => {
                         >
                           {r.isOfficial ? (
                             <>
-                              <i className="fas fa-times"></i> Retirer
+                              <i className="fas fa-times"></i> Reject
                             </>
                           ) : (
                             <>
-                              <i className="fas fa-check"></i> Valider
+                              <i className="fas fa-check"></i> Confirm
                             </>
                           )}
                         </button>
@@ -167,7 +167,7 @@ const Recipes = () => {
                           className="btn btn-danger btn-sm mb-1"
                           title="Supprimer cette recette"
                         >
-                          <i className="fas fa-trash"></i> Supprimer
+                          <i className="fas fa-trash"></i> Delete
                         </button>
                       </td>
                     </tr>

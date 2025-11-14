@@ -69,12 +69,12 @@ const Topbar = () => {
           >
             <Link className="dropdown-item" to="/profile">
               <i className="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-              Mon Profil
+              My Profile
             </Link>
             <div className="dropdown-divider"></div>
             <button className="dropdown-item" onClick={handleLogout}>
               <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-              Déconnexion
+              Disconnect
             </button>
           </div>
         </li>

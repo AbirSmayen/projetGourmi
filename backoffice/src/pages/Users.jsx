@@ -52,7 +52,7 @@ const Users = () => {
       <div className="container-fluid">
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
           <div className="spinner-border text-primary" role="status">
-            <span className="sr-only">Chargement...</span>
+            <span className="sr-only">Loading...</span>
           </div>
         </div>
       </div>
@@ -61,12 +61,12 @@ const Users = () => {
 
   return (
     <div className="container-fluid">
-      <h1 className="h3 mb-4 text-gray-800">Gestion des utilisateurs</h1>
+      <h1 className="h3 mb-4 text-gray-800">User Management</h1>
       
       <div className="card shadow mb-4">
         <div className="card-header py-3 d-flex justify-content-between align-items-center">
           <h6 className="m-0 font-weight-bold text-primary">
-            Liste des utilisateurs ({filteredUsers.length})
+            User List ({filteredUsers.length})
           </h6>
           <div className="input-group" style={{ width: "300px" }}>
             <input
@@ -88,10 +88,10 @@ const Users = () => {
             <table className="table table-bordered table-hover" width="100%" cellSpacing="0">
               <thead>
                 <tr>
-                  <th>Nom</th>
-                  <th>Prénom</th>
+                  <th>Last Name</th>
+                  <th>First Name</th>
                   <th>Email</th>
-                  <th>Date d'inscription</th>
+                  <th>Registration Date</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -109,7 +109,7 @@ const Users = () => {
                           className="btn btn-danger btn-sm"
                           title="Supprimer cet utilisateur"
                         >
-                          <i className="fas fa-trash"></i> Supprimer
+                          <i className="fas fa-trash"></i> Delete
                         </button>
                       </td>
                     </tr>
