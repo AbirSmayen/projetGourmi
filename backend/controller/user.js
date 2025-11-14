@@ -3,9 +3,15 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const userSignUp = async (req, res) => {
-  const { email, password, role } = req.body;
+  const { email, password, firstName, lastName, role, preferences } = req.body;
+  
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  // Vérifier si firstName et lastName sont fournis lors de l'inscription
+  if (!firstName || !lastName) {
+    return res.status(400).json({ message: "First name and last name are required" });
   }
 
   let user = await User.findOne({ email });
@@ -14,11 +20,22 @@ const userSignUp = async (req, res) => {
   }
 
   const hashPwd = await bcrypt.hash(password, 10);
-  const newUser = await User.create({
+  
+  // Créer l'objet utilisateur
+  const userData = {
+    firstName,
+    lastName,
     email,
     password: hashPwd,
     role: role || "user",
-  });
+  };
+
+  // Ajouter les préférences si elles sont fournies
+  if (preferences) {
+    userData.preferences = preferences;
+  }
+
+  const newUser = await User.create(userData);
 
   const token = jwt.sign(
     { email, id: newUser._id, role: newUser.role },
@@ -31,6 +48,7 @@ const userSignUp = async (req, res) => {
 
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
+  
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
   }
@@ -50,7 +68,12 @@ const userLogin = async (req, res) => {
 
 const getUser = async (req, res) => {
   const user = await User.findById(req.params.id);
-  res.json({ email: user.email });
+  res.json({ 
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    preferences: user.preferences
+  });
 };
 
 module.exports = { userLogin, userSignUp, getUser };
