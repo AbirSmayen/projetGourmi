@@ -8,6 +8,7 @@ import InputForm from "../components/InputForm"
 import { IoTimeOutline } from "react-icons/io5"
 import { CiEdit } from "react-icons/ci"
 import { MdDelete } from "react-icons/md"
+import { FaHeart, FaComment } from "react-icons/fa"
 
 export default function Home(){
   const navigate = useNavigate()
@@ -69,7 +70,6 @@ export default function Home(){
   }
 
   const onDelete = async(id) => {
-    // Confirmation avec SweetAlert2
     const result = await Swal.fire({
       title: 'Are you sure ?',
       text: "This action is irreversible!",
@@ -89,9 +89,7 @@ export default function Home(){
           }
         })
 
-        // Si la suppression réussit
         if (response.data.success) {
-          // Afficher le message de succès
           Swal.fire({
             title: 'Deleted!',
             text: 'Recipe was successfully deleted.',
@@ -100,10 +98,8 @@ export default function Home(){
             showConfirmButton: false
           })
           
-          // Retirer la recette de la liste
           setRecipes(recipes => recipes.filter(recipe => recipe._id !== id))
         } else {
-          // Erreur renvoyée par le backend
           Swal.fire({
             title: 'Erreur!',
             text: response.data.message || 'Impossible de supprimer la recette.',
@@ -236,6 +232,20 @@ export default function Home(){
                     <IoTimeOutline size={18} />
                     {item.time}
                   </p>
+
+                  {/* Interactions preview */}
+                  {!isMyRecipePage && (
+                    <div className="d-flex justify-content-center gap-3 mt-2">
+                      <span className="text-muted d-flex align-items-center gap-1">
+                        <FaHeart size={14} style={{ color: '#ff6b6b' }} />
+                        {item.likes?.length || 0}
+                      </span>
+                      <span className="text-muted d-flex align-items-center gap-1">
+                        <FaComment size={14} style={{ color: '#6c757d' }} />
+                        {item.comments?.length || 0}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
