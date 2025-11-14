@@ -15,7 +15,7 @@ const Users = () => {
       const { data } = await getUsers();
       console.log("Users reçus:", data);
       
-      // CORRECTION : Filtrer pour ne garder que les utilisateurs normaux (pas les admins)
+      //Filtrer pour ne garder que les utilisateurs normaux (pas les admins)
       const normalUsers = (data.data || []).filter(u => u.role !== "admin");
       setUsers(normalUsers);
     } catch (error) {

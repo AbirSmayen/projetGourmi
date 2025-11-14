@@ -1,4 +1,3 @@
-// backoffice/src/utils/recipeHelper.js
 
 /**
  * Fonction pour afficher l'auteur d'une recette de manière professionnelle
@@ -6,7 +5,7 @@
  * @returns {Object} - Informations d'affichage de l'auteur
  */
 export const getAuthorDisplay = (recipe) => {
-  // Si la recette est officielle, afficher "Gourmi"
+  // Recette officielle (admin)
   if (recipe.isOfficial) {
     return {
       name: "Gourmi",
@@ -16,8 +15,8 @@ export const getAuthorDisplay = (recipe) => {
       isOfficial: true
     };
   }
-  
-  // Si pas de créateur, afficher "Anonyme"
+
+  // Si pas de créateur connu
   if (!recipe.createdBy) {
     return {
       name: "Anonyme",
@@ -27,12 +26,12 @@ export const getAuthorDisplay = (recipe) => {
       isOfficial: false
     };
   }
-  
-  // Afficher les infos de l'utilisateur normal
+
+  //  Utilisateur normal
   const { firstName, lastName } = recipe.createdBy;
-  
+
+  // Construire le nom à afficher
   let displayName = "Utilisateur";
-  
   if (firstName && lastName) {
     displayName = `${firstName} ${lastName}`;
   } else if (firstName) {
@@ -40,7 +39,7 @@ export const getAuthorDisplay = (recipe) => {
   } else if (lastName) {
     displayName = lastName;
   }
-  
+
   return {
     name: displayName,
     displayName: displayName,

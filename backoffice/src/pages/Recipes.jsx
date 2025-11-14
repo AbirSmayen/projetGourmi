@@ -47,7 +47,7 @@ const Recipes = () => {
     }
   };
 
-  // CORRECTION : Fonction pour afficher le nom de l'auteur
+  // Fonction pour afficher le nom de l'auteur
   const getAuthorName = (recipe) => {
     if (!recipe.createdBy) return "Anonyme";
     

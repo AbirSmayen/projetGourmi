@@ -55,7 +55,7 @@ const OfficialRecipes = () => {
         formData.append("file", form.file);
       }
 
-      // ✅ NE PAS envoyer l'ID de l'admin
+      //  NE PAS envoyer l'ID de l'admin
       // Les recettes officielles auront createdBy: null dans le backend
 
       await createOfficialRecipe(formData);

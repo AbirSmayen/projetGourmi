@@ -14,7 +14,7 @@ const Statistics = () => {
     try {
       const { data } = await getStats();
       console.log("Stats reçues:", data); // Debug
-      setStats(data.data); // ✅ data.data au lieu de data
+      setStats(data.data); // data.data au lieu de data
     } catch (error) {
       console.error("Erreur:", error);
     } finally {

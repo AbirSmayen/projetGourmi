@@ -11,7 +11,7 @@ const Dashboard = () => {
       try {
         const { data } = await getStats();
         console.log("Stats reçues:", data); // Pour debug
-        setStats(data.data); // ✅ data.data car la réponse est { success: true, data: {...} }
+        setStats(data.data); // data.data car la réponse est { success: true, data: {...} }
       } catch (error) {
         console.error("Erreur lors du chargement des statistiques :", error);
       } finally {
