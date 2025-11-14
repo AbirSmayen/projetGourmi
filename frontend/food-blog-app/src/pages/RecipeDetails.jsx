@@ -14,9 +14,9 @@ export default function RecipeDetails() {
       console.log("Fetching recipe with ID:", id)
       setLoading(true)
       setError(null)
-      
+
       try {
-        const res = await axios.get(`http://localhost:5000/recipe/${id}`)
+        const res = await axios.get(`http://localhost:5000/api/recipes/${id}`)
         console.log("Recipe data:", res.data)
         setRecipe(res.data)
         setLoading(false)
@@ -26,13 +26,13 @@ export default function RecipeDetails() {
         setLoading(false)
       }
     }
-    
+
     if (id) {
       fetchRecipe()
     }
   }, [id])
 
-  // 🆕 Fonction pour obtenir les ingrédients en tableau
+  // Fonction pour obtenir les ingrédients en tableau
   const getIngredientsArray = (ingredients) => {
     if (Array.isArray(ingredients)) {
       return ingredients
@@ -86,7 +86,10 @@ export default function RecipeDetails() {
       <div className="container">
         {/* Header */}
         <div className="section-title">
-          <h2>{recipe.title}</h2>
+          <h2 style={{ fontWeight: "bold", fontSize: "2.2rem" }}>
+            {recipe.title}
+          </h2>
+
           <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
             <span className="badge bg-primary" style={{ fontSize: '1rem', padding: '0.5rem 1rem' }}>
               ⏱️ {recipe.time}
@@ -102,14 +105,14 @@ export default function RecipeDetails() {
         {/* Image */}
         <div className="row justify-content-center mb-5">
           <div className="col-lg-6 col-md-8 col-sm-10">
-            <img 
-              src={`http://localhost:5000/images/${recipe.coverImage}`} 
+            <img
+              src={`http://localhost:5000/images/${recipe.coverImage}`}
               alt={recipe.title}
               className="img-fluid rounded shadow-lg"
-              style={{ 
-                width: '100%', 
-                maxHeight: '400px', 
-                objectFit: 'cover', 
+              style={{
+                width: '100%',
+                maxHeight: '400px',
+                objectFit: 'cover',
                 borderRadius: '15px'
               }}
             />
@@ -125,22 +128,22 @@ export default function RecipeDetails() {
                 <h3 className="card-title mb-4" style={{ color: '#ce1212' }}>
                   🛒 Ingredients
                 </h3>
-                <ul style={{ 
-                  listStyle: 'none', 
+                <ul style={{
+                  listStyle: 'none',
                   padding: 0,
                   fontSize: '16px'
                 }}>
                   {ingredientsArray.map((ing, i) => (
-                    <li 
-                      key={i} 
-                      style={{ 
+                    <li
+                      key={i}
+                      style={{
                         marginBottom: '12px',
                         paddingLeft: '25px',
                         position: 'relative',
                         lineHeight: '1.6'
                       }}
                     >
-                      <span style={{ 
+                      <span style={{
                         position: 'absolute',
                         left: 0,
                         color: '#28a745',
@@ -163,8 +166,8 @@ export default function RecipeDetails() {
                 <h3 className="card-title mb-4" style={{ color: '#ce1212' }}>
                   📝 Instructions
                 </h3>
-                <div style={{ 
-                  whiteSpace: 'pre-line', 
+                <div style={{
+                  whiteSpace: 'pre-line',
                   lineHeight: '1.8',
                   fontSize: '16px'
                 }}>
@@ -177,8 +180,8 @@ export default function RecipeDetails() {
 
         {/* Back Button */}
         <div className="text-center mt-5 mb-5">
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="btn-get-started"
             style={{ padding: '12px 30px' }}
           >

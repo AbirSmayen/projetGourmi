@@ -66,7 +66,7 @@ export default function InputForm({ setIsOpen }){
         <div className="col-12">
           <button 
             type="submit" 
-            className="btn btn-primary w-100"
+            className="btn btn-danger w-100"
             disabled={loading}
           >
             {loading ? (

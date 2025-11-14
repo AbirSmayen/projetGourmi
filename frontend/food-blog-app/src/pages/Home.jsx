@@ -37,14 +37,14 @@ export default function Home(){
             return
           }
           
-          const res = await axios.get('http://localhost:5000/recipe/my', {
+          const res = await axios.get('http://localhost:5000/api/recipes/my', {
             headers: {
               'authorization': 'bearer ' + token
             }
           })
           setRecipes(res.data)
         } else {
-          const res = await axios.get('http://localhost:5000/recipe')
+          const res = await axios.get('http://localhost:5000/api/recipes')
           setRecipes(res.data)
         }
         setLoading(false)

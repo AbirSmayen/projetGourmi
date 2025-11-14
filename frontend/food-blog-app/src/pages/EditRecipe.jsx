@@ -14,7 +14,7 @@ export default function EditRecipe(){
   useEffect(() => {
     const getData = async() => {
       try {
-        const response = await axios.get(`http://localhost:5000/recipe/${id}`)
+        const response = await axios.get(`http://localhost:5000/api/recipes/${id}`)
         let res = response.data
         setRecipeData({
           title: res.title,
@@ -27,7 +27,7 @@ export default function EditRecipe(){
         console.error("Error loading recipe:", err)
         Swal.fire({
           title: 'Erreur!',
-          text: 'Impossible de charger la recette.',
+          text: 'Unable to load recipe.',
           icon: 'error'
         }).then(() => navigate("/myRecipe"))
       }
@@ -62,7 +62,7 @@ export default function EditRecipe(){
       }
 
       const token = localStorage.getItem("token")
-      const response = await axios.put(`http://localhost:5000/recipe/${id}`, formData, {
+      const response = await axios.put(`http://localhost:5000/api/recipes/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'authorization': 'bearer ' + token
@@ -72,8 +72,8 @@ export default function EditRecipe(){
       // Utiliser SweetAlert au lieu de alert
       if (response.data.success) {
         await Swal.fire({
-          title: 'Succès!',
-          text: 'La recette a été modifiée avec succès.',
+          title: 'Success!',
+          text: 'The recipe has been successfully modified.',
           icon: 'success',
           timer: 2000,
           showConfirmButton: false
@@ -81,16 +81,16 @@ export default function EditRecipe(){
         navigate("/myRecipe")
       } else {
         Swal.fire({
-          title: 'Erreur!',
-          text: response.data.message || 'Impossible de modifier la recette.',
+          title: 'error!',
+          text: response.data.message || 'Unable to modify the recipe.',
           icon: 'error'
         })
       }
     } catch (err) {
       console.error("Error updating recipe:", err)
       Swal.fire({
-        title: 'Erreur!',
-        text: err.response?.data?.message || 'Une erreur est survenue.',
+        title: 'error!',
+        text: err.response?.data?.message || 'An error has occurred.',
         icon: 'error'
       })
     } finally {

@@ -12,7 +12,7 @@ import RecipeDetails from "./pages/RecipeDetails";
 //getAllRecipes renvoie toutes les recettes
 const getAllRecipes = async () => {
   try {
-    const res = await axios.get(`http://localhost:5000/recipe`)
+    const res = await axios.get(`http://localhost:5000/api/recipes`)
     return res.data // On renvoie les données directement
   } catch (error) {
     console.error("Erreur lors du chargement des recettes :", error)

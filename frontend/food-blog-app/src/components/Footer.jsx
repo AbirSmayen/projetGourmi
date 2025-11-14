@@ -29,7 +29,7 @@ export default function Footer(){
             <div>
               <h4>About</h4>
               <p>
-                Partagez vos recettes préférées et découvrez de nouvelles saveurs
+                Share your favorite recipes and discover new flavors
               </p>
             </div>
           </div>
