@@ -20,15 +20,35 @@ const recipeSchema = mongoose.Schema({
         type: String,
     },
     isOfficial: {
-    type: Boolean,
-    default: false
-},
-
+        type: Boolean,
+        default: false
+    },
     // Pour stocker l'id de l'utilisateur qui a créé la recette
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
-    }
+    },
+    // Système de likes
+    likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    // Système de commentaires
+    comments: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+        text: {
+            type: String,
+            required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Recipes", recipeSchema);
