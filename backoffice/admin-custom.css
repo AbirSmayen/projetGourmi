@@ -1,0 +1,151 @@
+/* Styles personnalisés pour l'admin backoffice */
+
+/* Améliorer le fond de la page de login */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Animations pour les cartes */
+.card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Style pour les inputs du formulaire */
+.form-control-user:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Boutons améliorés */
+.btn-user {
+  font-size: 0.9rem;
+  border-radius: 10rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-user:hover {
+  transform: scale(1.02);
+}
+
+/* Animation pour les alertes */
+.alert {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Améliorer le spinner */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+  .card-body.p-5 {
+    padding: 2rem !important;
+  }
+  
+  .h4.text-gray-900 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Améliorer la sidebar */
+.sidebar {
+  width: 6.5rem;
+  min-height: 100vh;
+  transition: width 0.3s ease;
+}
+
+.sidebar:hover {
+  width: 14rem;
+}
+
+.sidebar .nav-link {
+  transition: background-color 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style pour le topbar */
+.topbar {
+  height: 4.375rem;
+  transition: box-shadow 0.15s ease;
+}
+
+.topbar.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Tables améliorées */
+.table thead th {
+  border-bottom-width: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Badges améliorés */
+.badge {
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.35rem;
+}
+
+/* Boutons avec icônes */
+.btn i {
+  margin-right: 0.3rem;
+}
+
+/* Animation pour les statistiques */
+.card.border-left-primary,
+.card.border-left-success,
+.card.border-left-info,
+.card.border-left-warning {
+  border-left-width: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.card.border-left-primary:hover {
+  border-left-width: 0.5rem;
+}
+
+.card.border-left-success:hover {
+  border-left-width: 0.5rem;
+}
+
+.card.border-left-info:hover {
+  border-left-width: 0.5rem;
+}
+
+.card.border-left-warning:hover {
+  border-left-width: 0.5rem;
+}
