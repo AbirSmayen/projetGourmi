@@ -8,7 +8,7 @@ import EditRecipe from "./pages/EditRecipe";
 import RecipeDetails from "./pages/RecipeDetails";
 
 
-//Récupérer les données de la BD: nous néfinier les méthodes nécessaires
+//Récupérer les données de la BD
 //getAllRecipes renvoie toutes les recettes
 const getAllRecipes = async () => {
   try {
