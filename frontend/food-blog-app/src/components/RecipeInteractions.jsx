@@ -1,16 +1,17 @@
 import React, { useState } from "react"
 import axios from "axios"
-import { FaHeart, FaRegHeart, FaComment, FaTrash } from "react-icons/fa"
+import { FaHeart, FaRegHeart, FaComment, FaTrash, FaEdit, FaEye } from "react-icons/fa"
 import Swal from "sweetalert2"
 
 export default function RecipeInteractions({ recipe, onAuthRequired, refreshRecipe }) {
   const [commentText, setCommentText] = useState("")
   const [submittingComment, setSubmittingComment] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editCommentText, setEditCommentText] = useState("")
 
   const token = localStorage.getItem("token")
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}")
   
-  // Vérifier si l'utilisateur a déjà liké
   const isLiked = recipe.likes?.includes(currentUser._id)
   const likesCount = recipe.likes?.length || 0
 
@@ -41,6 +42,56 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
       })
     }
   }
+
+  // Voir qui a liké
+  const showLikers = async () => {
+  if (likesCount === 0) {
+    Swal.fire({
+      icon: "info",
+      title: "No likes yet",
+      text: "Be the first to like this recipe!"
+    })
+    return
+  }
+
+  try {
+    // Récupérer les détails complets de la recette avec les likes populés
+    const res = await axios.get(`http://localhost:5000/api/recipes/${recipe._id}`)
+    const fullRecipe = res.data
+    
+    // Créer la liste HTML des personnes qui ont liké
+    const likersList = fullRecipe.likes?.map((user) => {
+      const firstName = user.firstName || ""
+      const lastName = user.lastName || ""
+      const fullName = firstName && lastName 
+        ? `${firstName} ${lastName}` 
+        : firstName || lastName || user.email || "Anonymous User"
+      
+      return `
+        <li style="text-align: left; padding: 8px 0; border-bottom: 1px solid #eee;">
+          <span style="color: #ce1212; font-weight: bold;">👤</span> 
+          ${fullName}
+        </li>
+      `
+    }).join('') || '<p>No likes data available</p>'
+
+    Swal.fire({
+      title: `<span style="color: #ce1212;">${likesCount} ${likesCount === 1 ? 'Person' : 'People'} liked this recipe</span>`,
+      html: `<ul style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;">${likersList}</ul>`,
+      icon: "info",
+      confirmButtonColor: "#ce1212",
+      confirmButtonText: "Close",
+      width: '500px'
+    })
+  } catch (err) {
+    console.error("Error fetching likers:", err)
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to load users who liked this recipe"
+    })
+  }
+}
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
@@ -85,6 +136,51 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
     } finally {
       setSubmittingComment(false)
     }
+  }
+
+  const handleEditComment = (commentId, currentText) => {
+    setEditingCommentId(commentId)
+    setEditCommentText(currentText)
+  }
+
+  const handleSaveEdit = async (commentId) => {
+    if (!editCommentText.trim()) {
+      return
+    }
+
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/recipes/${recipe._id}/comment/${commentId}`,
+        { text: editCommentText },
+        {
+          headers: { authorization: `bearer ${token}` }
+        }
+      )
+
+      if (res.data.success) {
+        setEditingCommentId(null)
+        setEditCommentText("")
+        refreshRecipe()
+        Swal.fire({
+          icon: "success",
+          title: "Comment updated!",
+          timer: 1500,
+          showConfirmButton: false
+        })
+      }
+    } catch (err) {
+      console.error("Error editing comment:", err)
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to edit comment"
+      })
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null)
+    setEditCommentText("")
   }
 
   const handleDeleteComment = async (commentId) => {
@@ -160,7 +256,7 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
       {/* Like Section */}
       <div className="card shadow-sm mb-4" style={{ borderRadius: '10px' }}>
         <div className="card-body">
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-3 flex-wrap">
             <button
               onClick={handleLike}
               className="btn btn-lg"
@@ -176,6 +272,18 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
               {isLiked ? <FaHeart size={20} /> : <FaRegHeart size={20} />}
               <span className="ms-2 fw-bold">{likesCount}</span>
             </button>
+            
+            {likesCount > 0 && (
+              <button
+                onClick={showLikers}
+                className="btn btn-outline-secondary btn-sm"
+                style={{ borderRadius: '20px' }}
+              >
+                <FaEye className="me-1" />
+                See who liked
+              </button>
+            )}
+            
             <span className="text-muted">
               {likesCount === 0 ? "Be the first to like this recipe!" : 
                likesCount === 1 ? "1 person likes this" : 
@@ -233,30 +341,68 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
                     border: '1px solid #e9ecef'
                   }}
                 >
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <span className="fw-bold" style={{ color: '#ce1212' }}>
-                          {getUserFullName(comment.user)}
-                        </span>
-                        <span className="text-muted small">
-                          {formatDate(comment.createdAt)}
-                        </span>
+                  {editingCommentId === comment._id ? (
+                    // Mode édition
+                    <div>
+                      <textarea
+                        className="form-control mb-2"
+                        rows="3"
+                        value={editCommentText}
+                        onChange={(e) => setEditCommentText(e.target.value)}
+                        style={{ resize: 'none' }}
+                      />
+                      <div className="d-flex gap-2">
+                        <button
+                          onClick={() => handleSaveEdit(comment._id)}
+                          className="btn btn-sm btn-success"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="btn btn-sm btn-secondary"
+                        >
+                          Cancel
+                        </button>
                       </div>
-                      <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>
-                        {comment.text}
-                      </p>
                     </div>
-                    {comment.user?._id === currentUser._id && (
-                      <button
-                        onClick={() => handleDeleteComment(comment._id)}
-                        className="btn btn-sm btn-outline-danger"
-                        style={{ minWidth: '40px' }}
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    )}
-                  </div>
+                  ) : (
+                    // Mode affichage
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div className="flex-grow-1">
+                        <div className="d-flex align-items-center gap-2 mb-2">
+                          <span className="fw-bold" style={{ color: '#ce1212' }}>
+                            {getUserFullName(comment.user)}
+                          </span>
+                          <span className="text-muted small">
+                            {formatDate(comment.createdAt)}
+                            {comment.isEdited && <span className="ms-1">(edited)</span>}
+                          </span>
+                        </div>
+                        <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>
+                          {comment.text}
+                        </p>
+                      </div>
+                      {comment.user?._id === currentUser._id && (
+                        <div className="d-flex gap-2">
+                          <button
+                            onClick={() => handleEditComment(comment._id, comment.text)}
+                            className="btn btn-sm btn-outline-primary"
+                            style={{ minWidth: '40px' }}
+                          >
+                            <FaEdit size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="btn btn-sm btn-outline-danger"
+                            style={{ minWidth: '40px' }}
+                          >
+                            <FaTrash size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
