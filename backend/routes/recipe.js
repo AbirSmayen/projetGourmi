@@ -1,14 +1,32 @@
-const express=require("express")
-const { getRecipes, getRecipe, addRecipe, editRecipe,deleteRecipe, getMyRecipes, upload } = require("../controller/recipe")//toutes les méthodes du controlleur
+const express = require("express")
+const { 
+    getRecipes, 
+    getRecipe, 
+    addRecipe, 
+    editRecipe, 
+    deleteRecipe, 
+    getMyRecipes, 
+    upload,
+    toggleLike,
+    addComment,
+    editComment,    
+    deleteComment
+} = require("../controller/recipe")
 const verifyToken = require("../middleware/auth")
-const router=express.Router()
+const router = express.Router()
 
-//les routes
-router.get("/",getRecipes) //Get all recipes
-router.get("/my", verifyToken, getMyRecipes) // Get user's recipes
-router.get("/:id",getRecipe) //Get recipe by id
-router.post("/",upload.single('file'),verifyToken ,addRecipe) //Add recipe
-router.put("/:id", verifyToken, upload.single('file'), editRecipe) //Edit recipe
-router.delete("/:id",deleteRecipe) //Delete recipe
+// Routes d'interaction (nécessitent authentification)
+router.post("/:id/like", verifyToken, toggleLike)
+router.post("/:id/comment", verifyToken, addComment)
+router.put("/:id/comment/:commentId", verifyToken, editComment) 
+router.delete("/:id/comment/:commentId", verifyToken, deleteComment)
 
-module.exports=router
+// Routes de base
+router.get("/", getRecipes)
+router.get("/my", verifyToken, getMyRecipes)
+router.get("/:id", getRecipe)
+router.post("/", upload.single('file'), verifyToken, addRecipe)
+router.put("/:id", verifyToken, upload.single('file'), editRecipe)
+router.delete("/:id", deleteRecipe)
+
+module.exports = router

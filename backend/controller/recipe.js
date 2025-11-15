@@ -1,4 +1,4 @@
-const Recipes=require("../models/recipe")
+const Recipes = require("../models/recipe")
 const multer = require('multer')
 
 const storage = multer.diskStorage({
@@ -13,14 +13,18 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-const getRecipes=async(req,res)=>{
-    const recipes=await Recipes.find()
+const getRecipes = async(req, res) => {
+    const recipes = await Recipes.find()
     return res.json(recipes)
 }
 
 const getRecipe = async (req, res) => {
     try {
-        const recipe = await Recipes.findById(req.params.id).populate("createdBy", "firstName lastName");
+        const recipe = await Recipes.findById(req.params.id)
+            .populate("createdBy", "firstName lastName")
+            .populate("likes", "firstName lastName email")
+            .populate("comments.user", "firstName lastName");
+        
         if (!recipe) {
             return res.status(404).json({ message: "Recipe not found" })
         }
@@ -39,7 +43,6 @@ const addRecipe = async(req, res) => {
         return res.json({message: "Required fields can't be empty"})
     }
 
-    // Transformer la chaîne d'ingrédients en tableau
     let ingredientsArray = ingredients
     if (typeof ingredients === 'string') {
         ingredientsArray = ingredients.split(',').map(item => item.trim())
@@ -56,12 +59,10 @@ const addRecipe = async(req, res) => {
     return res.json(newRecipe)
 }
 
-// Fonction editRecipe 
 const editRecipe = async(req, res) => {
     try {
         const {title, ingredients, instructions, time} = req.body
         
-        // Vérifier si la recette existe
         let recipe = await Recipes.findById(req.params.id)
         
         if (!recipe) {
@@ -71,7 +72,6 @@ const editRecipe = async(req, res) => {
             })
         }
 
-        // Vérifier si l'utilisateur est le propriétaire
         if (recipe.createdBy.toString() !== req.user.id) {
             return res.status(403).json({ 
                 success: false, 
@@ -79,16 +79,13 @@ const editRecipe = async(req, res) => {
             })
         }
 
-        // Transformer les ingrédients en tableau si c'est une chaîne
         let ingredientsArray = ingredients
         if (typeof ingredients === 'string') {
             ingredientsArray = ingredients.split(',').map(item => item.trim())
         }
 
-        // Gérer l'image : garder l'ancienne si aucune nouvelle n'est fournie
         let coverImage = req.file?.filename || recipe.coverImage
 
-        // Mettre à jour la recette
         const updatedRecipe = await Recipes.findByIdAndUpdate(
             req.params.id,
             {
@@ -152,4 +149,182 @@ const getMyRecipes = async (req, res) => {
     }
 }
 
-module.exports={getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, getMyRecipes, upload}
+// ========== INTERACTIONS ==========
+
+// Toggle Like
+const toggleLike = async (req, res) => {
+    try {
+        const recipe = await Recipes.findById(req.params.id)
+        
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" })
+        }
+
+        const userId = req.user.id
+        const likeIndex = recipe.likes.indexOf(userId)
+
+        if (likeIndex > -1) {
+            // Unlike
+            recipe.likes.splice(likeIndex, 1)
+        } else {
+            // Like
+            recipe.likes.push(userId)
+        }
+
+        await recipe.save()
+
+        return res.json({ 
+            success: true,
+            likes: recipe.likes.length,
+            isLiked: likeIndex === -1
+        })
+    } catch (err) {
+        console.error("Error toggling like:", err)
+        return res.status(500).json({ message: "Error toggling like" })
+    }
+}
+
+// Add Comment
+const addComment = async (req, res) => {
+    try {
+        const { text } = req.body
+        
+        if (!text || text.trim() === "") {
+            return res.status(400).json({ message: "Comment text is required" })
+        }
+
+        const recipe = await Recipes.findById(req.params.id)
+        
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" })
+        }
+
+        const newComment = {
+            user: req.user.id,
+            text: text.trim(),
+            createdAt: new Date()
+        }
+
+        recipe.comments.push(newComment)
+        await recipe.save()
+
+        // Populate le user du nouveau commentaire
+        const populatedRecipe = await Recipes.findById(req.params.id)
+            .populate("comments.user", "firstName lastName")
+        
+        const addedComment = populatedRecipe.comments[populatedRecipe.comments.length - 1]
+
+        return res.json({ 
+            success: true,
+            comment: addedComment
+        })
+    } catch (err) {
+        console.error("Error adding comment:", err)
+        return res.status(500).json({ message: "Error adding comment" })
+    }
+}
+
+// Delete Comment
+const deleteComment = async (req, res) => {
+    try {
+        const { commentId } = req.params
+        
+        const recipe = await Recipes.findById(req.params.id)
+        
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" })
+        }
+
+        // Trouver l'index du commentaire
+        const commentIndex = recipe.comments.findIndex(
+            comment => comment._id.toString() === commentId
+        )
+        
+        if (commentIndex === -1) {
+            return res.status(404).json({ message: "Comment not found" })
+        }
+
+        const comment = recipe.comments[commentIndex]
+
+        // Vérifier si l'utilisateur est le propriétaire du commentaire
+        if (comment.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to delete this comment" })
+        }
+
+        // Supprimer le commentaire avec splice
+        recipe.comments.splice(commentIndex, 1)
+        await recipe.save()
+
+        return res.json({ 
+            success: true,
+            message: "Comment deleted successfully"
+        })
+    } catch (err) {
+        console.error("Error deleting comment:", err)
+        return res.status(500).json({ message: "Error deleting comment" })
+    }
+}
+
+// Edit Comment
+const editComment = async (req, res) => {
+    try {
+        const { commentId } = req.params
+        const { text } = req.body
+        
+        if (!text || text.trim() === "") {
+            return res.status(400).json({ message: "Comment text is required" })
+        }
+
+        const recipe = await Recipes.findById(req.params.id)
+        
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" })
+        }
+
+        // Trouver le commentaire
+        const comment = recipe.comments.id(commentId)
+        
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" })
+        }
+
+        // Vérifier si l'utilisateur est le propriétaire du commentaire
+        if (comment.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to edit this comment" })
+        }
+
+        // Mettre à jour le commentaire
+        comment.text = text.trim()
+        comment.isEdited = true
+        await recipe.save()
+
+        // Populate le user
+        const updatedRecipe = await Recipes.findById(req.params.id)
+            .populate("comments.user", "firstName lastName")
+        
+        const updatedComment = updatedRecipe.comments.id(commentId)
+
+        return res.json({ 
+            success: true,
+            comment: updatedComment,
+            message: "Comment updated successfully"
+        })
+    } catch (err) {
+        console.error("Error editing comment:", err)
+        return res.status(500).json({ message: "Error editing comment" })
+    }
+}
+
+module.exports = {
+    getRecipes, 
+    getRecipe, 
+    addRecipe, 
+    editRecipe, 
+    deleteRecipe, 
+    getMyRecipes, 
+    upload,
+    toggleLike,
+    addComment,
+    editComment,
+    deleteComment
+}
