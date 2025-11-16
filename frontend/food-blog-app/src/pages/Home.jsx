@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate, useLocation, useOutletContext } from "react-router-dom"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import Swal from "sweetalert2" 
@@ -13,8 +13,10 @@ import { FaHeart, FaComment, FaCrown, FaCheckCircle } from "react-icons/fa"
 export default function Home(){
   const navigate = useNavigate()
   const location = useLocation()
+  const { searchQuery, setSearchQuery } = useOutletContext()
   const [isOpen, setIsOpen] = useState(false)
   const [recipes, setRecipes] = useState([])
+  const [filteredRecipes, setFilteredRecipes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   
@@ -22,7 +24,9 @@ export default function Home(){
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [location.pathname])
+    // Réinitialiser la recherche lors du changement de page
+    setSearchQuery("")
+  }, [location.pathname, setSearchQuery])
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -34,6 +38,7 @@ export default function Home(){
           const token = localStorage.getItem("token")
           if (!token) {
             setRecipes([])
+            setFilteredRecipes([])
             setLoading(false)
             return
           }
@@ -44,9 +49,11 @@ export default function Home(){
             }
           })
           setRecipes(res.data)
+          setFilteredRecipes(res.data)
         } else {
           const res = await axios.get('http://localhost:5000/api/recipes')
           setRecipes(res.data)
+          setFilteredRecipes(res.data)
         }
         setLoading(false)
       } catch (err) {
@@ -58,6 +65,18 @@ export default function Home(){
     
     fetchRecipes()
   }, [isMyRecipePage])
+
+  // Fonction de filtrage des recettes (par titre uniquement)
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredRecipes(recipes)
+    } else {
+      const filtered = recipes.filter(recipe => 
+        recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setFilteredRecipes(filtered)
+    }
+  }, [searchQuery, recipes])
 
   const addRecipe = () => {
     let token = localStorage.getItem("token")
@@ -117,7 +136,6 @@ export default function Home(){
     }
   }
 
-  // Fonction pour obtenir le badge de statut
   const getRecipeBadge = (recipe) => {
     if (recipe.isOfficial) {
       return (
@@ -194,6 +212,11 @@ export default function Home(){
               <span>{isMyRecipePage ? "Manage Your" : "Check Our"}</span>{" "}
               <span className="description-title">Delicious Recipes</span>
             </p>
+            {searchQuery && recipes.length > 0 && (
+              <p className="text-muted mt-2">
+                {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} found for "{searchQuery}"
+              </p>
+            )}
           </div>
 
           <div className="container">
@@ -227,8 +250,22 @@ export default function Home(){
               </div>
             )}
 
+            {!loading && !error && recipes.length > 0 && filteredRecipes.length === 0 && (
+              <div className="text-center py-5">
+                <p className="fs-5 text-muted">
+                  No recipes match your search "{searchQuery}"
+                </p>
+                <button 
+                  onClick={() => setSearchQuery("")}
+                  className="btn btn-outline-primary mt-3"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+
             <div className="row gy-4">
-              {recipes.map((item, index) => (
+              {filteredRecipes.map((item, index) => (
                 <div key={index} className="col-xl-3 col-lg-4 col-md-6 menu-item">
                   <div style={{ position: 'relative' }}>
                     <Link to={`/recipe/${item._id}`}>
@@ -250,7 +287,6 @@ export default function Home(){
                       />
                     </Link>
                     
-                    {/* Badge en haut à droite de l'image */}
                     {getRecipeBadge(item) && (
                       <div style={{ 
                         position: 'absolute', 
@@ -290,7 +326,6 @@ export default function Home(){
                     {item.time}
                   </p>
 
-                  {/* Interactions preview */}
                   {!isMyRecipePage && (
                     <div className="d-flex justify-content-center gap-3 mt-2">
                       <span className="text-muted d-flex align-items-center gap-1">

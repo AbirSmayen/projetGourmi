@@ -1,12 +1,12 @@
-// frontend/src/components/Navbar.jsx - VERSION MISE À JOUR
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import InputForm from "./InputForm";
 import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { IoSearchOutline } from "react-icons/io5";
 
-export default function Navbar() {
+export default function Navbar({ onSearch, searchQuery }) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   let token = localStorage.getItem("token");
@@ -43,16 +43,7 @@ export default function Navbar() {
       });
       
       navigate("/");
-      // Force refresh pour mettre à jour l'état
       window.location.reload();
-    }
-  };
-
-  const checkLogin = () => {
-    if (token) {
-      handleLogout();
-    } else {
-      setIsOpen(true);
     }
   };
 
@@ -86,9 +77,70 @@ export default function Navbar() {
             <i className="mobile-nav-toggle d-xl-none bi bi-list"></i>
           </nav>
 
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center gap-3">
+            {/* Barre de recherche */}
+            <div className="position-relative d-none d-lg-block" style={{ width: "280px" }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search recipes..."
+                value={searchQuery || ""}
+                onChange={(e) => onSearch(e.target.value)}
+                style={{
+                  paddingLeft: '38px',
+                  paddingRight: searchQuery ? '38px' : '12px',
+                  borderRadius: '25px',
+                  border: '1px solid #ddd',
+                  fontSize: '14px',
+                  height: '40px',
+                  transition: 'all 0.3s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#ce1212';
+                  e.target.style.boxShadow = '0 0 0 0.2rem rgba(206, 18, 18, 0.25)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#ddd';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+              <IoSearchOutline 
+                size={20} 
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#6c757d',
+                  pointerEvents: 'none'
+                }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => onSearch("")}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6c757d',
+                    cursor: 'pointer',
+                    fontSize: '20px',
+                    padding: '0',
+                    width: '20px',
+                    height: '20px',
+                    lineHeight: '1',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+
             {!isLogin ? (
-              // User logged in - Show dropdown menu
               <div className="dropdown">
                 <button
                   className="btn btn-outline-danger dropdown-toggle d-flex align-items-center gap-2"
@@ -132,7 +184,6 @@ export default function Navbar() {
                 </ul>
               </div>
             ) : (
-              // User not logged in - Show login button
               <a
                 href="#"
                 className="btn-getstarted"
