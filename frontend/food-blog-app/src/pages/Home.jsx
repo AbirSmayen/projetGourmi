@@ -8,7 +8,7 @@ import InputForm from "../components/InputForm"
 import { IoTimeOutline } from "react-icons/io5"
 import { CiEdit } from "react-icons/ci"
 import { MdDelete } from "react-icons/md"
-import { FaHeart, FaComment } from "react-icons/fa"
+import { FaHeart, FaComment, FaCrown, FaCheckCircle } from "react-icons/fa"
 
 export default function Home(){
   const navigate = useNavigate()
@@ -117,6 +117,49 @@ export default function Home(){
     }
   }
 
+  // Fonction pour obtenir le badge de statut
+  const getRecipeBadge = (recipe) => {
+    if (recipe.isOfficial) {
+      return (
+        <span 
+          className="badge" 
+          style={{ 
+            backgroundColor: '#4169E1', 
+            color: 'white',
+            fontSize: '0.75rem',
+            padding: '0.4rem 0.6rem',
+            borderRadius: '12px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.3rem'
+          }}
+        >
+          <FaCrown size={12} /> Official
+        </span>
+      )
+    }
+    if (recipe.isAccepted) {
+      return (
+        <span 
+          className="badge" 
+          style={{ 
+            backgroundColor: '#28a745', 
+            color: 'white',
+            fontSize: '0.75rem',
+            padding: '0.4rem 0.6rem',
+            borderRadius: '12px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.3rem'
+          }}
+        >
+          <FaCheckCircle size={12} /> Verified
+        </span>
+      )
+    }
+    return null
+  }
+
   return (
     <>
       <main className="main">
@@ -187,24 +230,38 @@ export default function Home(){
             <div className="row gy-4">
               {recipes.map((item, index) => (
                 <div key={index} className="col-xl-3 col-lg-4 col-md-6 menu-item">
-                  <Link to={`/recipe/${item._id}`}>
-                    <img 
-                      src={`http://localhost:5000/images/${item.coverImage}`} 
-                      className="menu-img img-fluid" 
-                      alt={item.title}
-                      style={{ 
-                        width: '100%', 
-                        height: '200px', 
-                        objectFit: 'contain', 
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        transition: 'transform 0.3s ease',
-                        backgroundColor: '#f8f9fa'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    />
-                  </Link>
+                  <div style={{ position: 'relative' }}>
+                    <Link to={`/recipe/${item._id}`}>
+                      <img 
+                        src={`http://localhost:5000/images/${item.coverImage}`} 
+                        className="menu-img img-fluid" 
+                        alt={item.title}
+                        style={{ 
+                          width: '100%', 
+                          height: '200px', 
+                          objectFit: 'contain', 
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'transform 0.3s ease',
+                          backgroundColor: '#f8f9fa'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      />
+                    </Link>
+                    
+                    {/* Badge en haut à droite de l'image */}
+                    {getRecipeBadge(item) && (
+                      <div style={{ 
+                        position: 'absolute', 
+                        top: '10px', 
+                        right: '10px',
+                        zIndex: 10
+                      }}>
+                        {getRecipeBadge(item)}
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="d-flex justify-content-between align-items-center mt-3">
                     <h4 className="text-center w-100">{item.title}</h4>
