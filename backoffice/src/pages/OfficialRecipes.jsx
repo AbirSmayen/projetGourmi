@@ -22,7 +22,7 @@ const OfficialRecipes = () => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setMessage({ type: "danger", text: "L'image ne doit pas dépasser 5MB" });
+        setMessage({ type: "danger", text: "Image must not exceed 5MB" });
         e.target.value = null;
         return;
       }
@@ -39,7 +39,7 @@ const OfficialRecipes = () => {
     try {
       // Validation
       if (!form.title || !form.ingredients || !form.instructions || !form.time) {
-        setMessage({ type: "danger", text: "Tous les champs sont requis" });
+        setMessage({ type: "danger", text: "All fields are required" });
         setLoading(false);
         return;
       }
@@ -56,11 +56,11 @@ const OfficialRecipes = () => {
       }
 
       //  NE PAS envoyer l'ID de l'admin
-      // Les recettes officielles auront createdBy: null dans le backend
+      // Les recettes officielles auront createdBy:null dans le backend
 
       await createOfficialRecipe(formData);
 
-      setMessage({ type: "success", text: "Recette officielle ajoutée avec succès !" });
+      setMessage({ type: "success", text: "Official recipe added successfully!" });
       
       // Réinitialiser le formulaire
       setForm({
@@ -78,7 +78,7 @@ const OfficialRecipes = () => {
       console.error("Erreur:", error);
       setMessage({ 
         type: "danger", 
-        text: error.response?.data?.message || "Erreur lors de l'ajout de la recette" 
+        text: error.response?.data?.message || "Error while adding the recipe" 
       });
     } finally {
       setLoading(false);
@@ -87,7 +87,7 @@ const OfficialRecipes = () => {
 
   return (
     <div className="container-fluid">
-      <h1 className="h3 mb-4 text-gray-800">Ajouter une recette officielle</h1>
+      <h1 className="h3 mb-4 text-gray-800">Add an Official Recipe</h1>
 
       {message.text && (
         <div className={`alert alert-${message.type} alert-dismissible fade show`} role="alert">
@@ -111,7 +111,7 @@ const OfficialRecipes = () => {
         <div className="card-header py-3">
           <h6 className="m-0 font-weight-bold text-primary">
             <i className="fas fa-plus-circle mr-2"></i>
-            Formulaire d'ajout
+            Add Form
           </h6>
         </div>
         <div className="card-body">
@@ -121,14 +121,14 @@ const OfficialRecipes = () => {
               <div className="col-md-6">
                 <div className="form-group">
                   <label htmlFor="title">
-                    Titre de la recette <span className="text-danger">*</span>
+                    Recipe Title <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
                     id="title"
                     name="title"
                     className="form-control"
-                    placeholder="Ex: Gâteau au Chocolat"
+                    placeholder="Ex: Chocolate Cake"
                     value={form.title}
                     onChange={handleChange}
                     required
@@ -140,7 +140,7 @@ const OfficialRecipes = () => {
               <div className="col-md-6">
                 <div className="form-group">
                   <label htmlFor="time">
-                    Temps de préparation <span className="text-danger">*</span>
+                    Preparation Time <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -153,7 +153,7 @@ const OfficialRecipes = () => {
                     required
                   />
                   <small className="form-text text-muted">
-                    Format: "30 min" ou "1h 30min"
+                    Format: "30 min" or "1h 30min"
                   </small>
                 </div>
               </div>
@@ -162,34 +162,34 @@ const OfficialRecipes = () => {
             {/* Ingrédients */}
             <div className="form-group">
               <label htmlFor="ingredients">
-                Ingrédients (séparés par des virgules) <span className="text-danger">*</span>
+                Ingredients (separated by commas) <span className="text-danger">*</span>
               </label>
               <textarea
                 id="ingredients"
                 name="ingredients"
                 className="form-control"
                 rows="4"
-                placeholder="Ex: 200g de farine, 100g de sucre, 3 œufs..."
+                placeholder="Ex: 200g flour, 100g sugar, 3 eggs..."
                 value={form.ingredients}
                 onChange={handleChange}
                 required
               />
               <small className="form-text text-muted">
-                Séparez chaque ingrédient par une virgule
+                Separate each ingredient with a comma
               </small>
             </div>
 
             {/* Instructions */}
             <div className="form-group">
               <label htmlFor="instructions">
-                Instructions de préparation <span className="text-danger">*</span>
+                Preparation Instructions <span className="text-danger">*</span>
               </label>
               <textarea
                 id="instructions"
                 name="instructions"
                 className="form-control"
                 rows="6"
-                placeholder="Décrivez les étapes de préparation..."
+                placeholder="Describe the preparation steps..."
                 value={form.instructions}
                 onChange={handleChange}
                 required
@@ -199,7 +199,7 @@ const OfficialRecipes = () => {
             {/* Image */}
             <div className="form-group">
               <label htmlFor="fileInput">
-                Image de la recette
+                Recipe Image
               </label>
               <div className="custom-file">
                 <input
@@ -210,11 +210,11 @@ const OfficialRecipes = () => {
                   onChange={handleFileChange}
                 />
                 <label className="custom-file-label" htmlFor="fileInput">
-                  {form.file ? form.file.name : "Choisir une image..."}
+                  {form.file ? form.file.name : "Choose an image..."}
                 </label>
               </div>
               <small className="form-text text-muted">
-                Formats acceptés: JPG, PNG, GIF, WEBP (max 5MB)
+                Accepted formats: JPG, PNG, GIF, WEBP (max 5MB)
               </small>
             </div>
 
@@ -228,12 +228,12 @@ const OfficialRecipes = () => {
                 {loading ? (
                   <>
                     <span className="spinner-border spinner-border-sm mr-2" role="status"></span>
-                    Ajout en cours...
+                    Adding...
                   </>
                 ) : (
                   <>
                     <i className="fas fa-save mr-2"></i>
-                    Ajouter la recette officielle
+                    Add Official Recipe
                   </>
                 )}
               </button>
@@ -253,7 +253,7 @@ const OfficialRecipes = () => {
                 }}
               >
                 <i className="fas fa-undo mr-2"></i>
-                Réinitialiser
+                Reset
               </button>
             </div>
           </form>
