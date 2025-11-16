@@ -1,17 +1,13 @@
 import axios from "axios";
 
-// Base URL de l'API - Ne PAS inclure /api dans VITE_API_URL
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-// Instance axios pour les routes admin
 const api = axios.create({
   baseURL: `${apiUrl}/api/admin`,
 });
 
-// Log pour debug (à retirer en production)
-console.log(" API Base URL:", `${apiUrl}/api/admin`);
+console.log("API Base URL:", `${apiUrl}/api/admin`);
 
-// Intercepteur pour ajouter le token à chaque requête
 api.interceptors.request.use((config) => {
   const raw = localStorage.getItem("auth");
   if (raw) {
@@ -27,12 +23,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Intercepteur pour gérer les erreurs
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token invalide ou expiré
       localStorage.removeItem("auth");
       window.location.href = "/login";
     }
@@ -42,6 +36,9 @@ api.interceptors.response.use(
 
 // === USERS ===
 export const getUsers = () => api.get("/users");
+export const getUserById = (id) => api.get(`/users/${id}`);
+export const updateUser = (id, userData) => api.put(`/users/${id}`, userData);
+export const blockUser = (id, isBlocked) => api.patch(`/users/${id}/block`, { isBlocked });
 export const deleteUser = (id) => api.delete(`/users/${id}`);
 
 // === RECIPES ===
@@ -49,8 +46,6 @@ export const getRecipes = () => api.get("/recipes");
 export const validateRecipe = (id, isOfficial) =>
   api.put(`/recipes/${id}/validate`, { isOfficial });
 export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
-
-// CORRECTION : Envoyer FormData au lieu de JSON
 export const createOfficialRecipe = (formData) => 
   api.post("/recipes/official", formData, {
     headers: {
