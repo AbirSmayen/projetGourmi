@@ -1,8 +1,5 @@
 const User = require("../models/user");
 
-/**
- * Middleware pour vérifier si l'utilisateur est bloqué
- */
 const checkIfBlocked = async (req, res, next) => {
   try {
     // Vérifier que l'utilisateur est authentifié

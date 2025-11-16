@@ -41,10 +41,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST /official
+//Créer une recette officielle
 router.post("/official", upload.single("file"), async (req, res) => {
   try {
-    const { title, ingredients, instructions, time, createdBy } = req.body;
+    const { title, ingredients, instructions, time } = req.body;
     let parsedIngredients = ingredients;
     if (typeof ingredients === "string") {
       try {
@@ -59,7 +59,8 @@ router.post("/official", upload.single("file"), async (req, res) => {
       instructions,
       time,
       coverImage: req.file ? req.file.filename : "default-recipe.jpg",
-      isOfficial: true,
+      isOfficial: true, // Recette officielle
+      isAccepted: false, // N/A pour les recettes officielles
       createdBy: null, // null pour les recettes officielles
     });
     res
@@ -70,23 +71,37 @@ router.post("/official", upload.single("file"), async (req, res) => {
   }
 });
 
-// PUT /validate
-router.put("/:id/validate", async (req, res) => {
+//Accepter une recette utilisateur
+router.put("/:id/accept", async (req, res) => {
   try {
-    const { isOfficial } = req.body;
+    const { isAccepted } = req.body;
+    const recipe = await Recipe.findById(req.params.id);
+    
+    if (!recipe) {
+      return res.status(404).json({ success: false, message: "Recette introuvable" });
+    }
+
+    // Ne peut accepter que les recettes utilisateurs (non officielles)
+    if (recipe.isOfficial) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Impossible de modifier le statut d'une recette officielle" 
+      });
+    }
+
     const updated = await Recipe.findByIdAndUpdate(
       req.params.id,
-      { isOfficial },
+      { isAccepted },
       { new: true }
     ).populate("createdBy", "firstName lastName");
-    if (!updated)
-      return res.status(404).json({ success: false, message: "Recette introuvable" });
+    
     res.status(200).json({ success: true, data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
+// Supprimer une recette
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Recipe.findByIdAndDelete(req.params.id);

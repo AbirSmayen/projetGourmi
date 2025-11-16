@@ -19,7 +19,13 @@ const recipeSchema = mongoose.Schema({
     coverImage: {
         type: String,
     },
+    // Recette créée directement par l'admin
     isOfficial: {
+        type: Boolean,
+        default: false
+    },
+    // Recette utilisateur acceptée par l'admin
+    isAccepted: {
         type: Boolean,
         default: false
     },

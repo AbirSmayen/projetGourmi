@@ -313,7 +313,40 @@ const editComment = async (req, res) => {
         console.error("Error editing comment:", err)
         return res.status(500).json({ message: "Error editing comment" })
     }
-}
+};
+
+// Accepter/Rejeter une recette utilisateur
+const acceptRecipe = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isAccepted } = req.body;
+
+        const recipe = await Recipes.findByIdAndUpdate(
+            id,
+            { isAccepted },
+            { new: true }
+        ).populate("createdBy", "firstName lastName");
+
+        if (!recipe) {
+            return res.status(404).json({
+                success: false,
+                message: "Recipe not found"
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: isAccepted ? "Recipe accepted successfully" : "Recipe rejected",
+            data: recipe
+        });
+    } catch (error) {
+        console.error("Error accepting recipe:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error accepting recipe"
+        });
+    }
+};
 
 module.exports = {
     getRecipes, 
@@ -326,5 +359,6 @@ module.exports = {
     toggleLike,
     addComment,
     editComment,
-    deleteComment
+    deleteComment,
+    acceptRecipe
 }
