@@ -13,17 +13,32 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
+// GET toutes les recettes avec tri intelligent
 const getRecipes = async(req, res) => {
-    const recipes = await Recipes.find()
-    return res.json(recipes)
+    try {
+        const recipes = await Recipes.find()
+            .populate("createdBy", "firstName lastName image")
+            .populate("likes", "firstName lastName image")
+            .populate("comments.user", "firstName lastName image")
+            .sort({ 
+                isOfficial: -1,   // 1. Recettes officielles en premier
+                isAccepted: -1,   // 2. Puis recettes acceptées
+                createdAt: -1     // 3. Puis par date (plus récentes)
+            })
+        
+        return res.json(recipes)
+    } catch (err) {
+        console.error("Error fetching recipes:", err)
+        return res.status(500).json({ message: "Error fetching recipes" })
+    }
 }
 
 const getRecipe = async (req, res) => {
     try {
         const recipe = await Recipes.findById(req.params.id)
-            .populate("createdBy", "firstName lastName")
-            .populate("likes", "firstName lastName email")
-            .populate("comments.user", "firstName lastName");
+            .populate("createdBy", "firstName lastName image")
+            .populate("likes", "firstName lastName image")
+            .populate("comments.user", "firstName lastName image");
         
         if (!recipe) {
             return res.status(404).json({ message: "Recipe not found" })
@@ -36,27 +51,42 @@ const getRecipe = async (req, res) => {
 }
 
 const addRecipe = async(req, res) => {
-    console.log(req.user)
-    const {title, ingredients, instructions, time} = req.body
+    try {
+        console.log(req.user)
+        const {title, ingredients, instructions, time} = req.body
 
-    if(!title || !ingredients || !instructions){
-        return res.json({message: "Required fields can't be empty"})
+        if(!title || !ingredients || !instructions){
+            return res.status(400).json({message: "Required fields can't be empty"})
+        }
+
+        let ingredientsArray = ingredients
+        if (typeof ingredients === 'string') {
+            ingredientsArray = ingredients.split(',').map(item => item.trim())
+        }
+
+        const newRecipe = await Recipes.create({
+            title,
+            ingredients: ingredientsArray,
+            instructions,
+            time,
+            coverImage: req.file.filename,
+            createdBy: req.user.id,
+            isAccepted: false,  // Par défaut non acceptée
+            isOfficial: false   // Par défaut non officielle
+        })
+        
+        return res.status(201).json({
+            success: true,
+            message: "Recipe published successfully!",
+            recipe: newRecipe
+        })
+    } catch(err) {
+        console.error("Error creating recipe:", err)
+        return res.status(500).json({ 
+            success: false,
+            message: "Error creating recipe" 
+        })
     }
-
-    let ingredientsArray = ingredients
-    if (typeof ingredients === 'string') {
-        ingredientsArray = ingredients.split(',').map(item => item.trim())
-    }
-
-    const newRecipe = await Recipes.create({
-        title,
-        ingredients: ingredientsArray,
-        instructions,
-        time,
-        coverImage: req.file.filename,
-        createdBy: req.user.id
-    })
-    return res.json(newRecipe)
 }
 
 const editRecipe = async(req, res) => {
@@ -143,6 +173,7 @@ const deleteRecipe = async(req, res) => {
 const getMyRecipes = async (req, res) => {
     try {
         const recipes = await Recipes.find({ createdBy: req.user.id })
+            .sort({ createdAt: -1 })
         return res.json(recipes)
     } catch (err) {
         return res.status(500).json({ message: "Error fetching user recipes" })
@@ -151,7 +182,6 @@ const getMyRecipes = async (req, res) => {
 
 // ========== INTERACTIONS ==========
 
-// Toggle Like
 const toggleLike = async (req, res) => {
     try {
         const recipe = await Recipes.findById(req.params.id)
@@ -164,10 +194,8 @@ const toggleLike = async (req, res) => {
         const likeIndex = recipe.likes.indexOf(userId)
 
         if (likeIndex > -1) {
-            // Unlike
             recipe.likes.splice(likeIndex, 1)
         } else {
-            // Like
             recipe.likes.push(userId)
         }
 
@@ -184,7 +212,6 @@ const toggleLike = async (req, res) => {
     }
 }
 
-// Add Comment
 const addComment = async (req, res) => {
     try {
         const { text } = req.body
@@ -208,9 +235,8 @@ const addComment = async (req, res) => {
         recipe.comments.push(newComment)
         await recipe.save()
 
-        // Populate le user du nouveau commentaire
         const populatedRecipe = await Recipes.findById(req.params.id)
-            .populate("comments.user", "firstName lastName")
+            .populate("comments.user", "firstName lastName image")
         
         const addedComment = populatedRecipe.comments[populatedRecipe.comments.length - 1]
 
@@ -224,7 +250,6 @@ const addComment = async (req, res) => {
     }
 }
 
-// Delete Comment
 const deleteComment = async (req, res) => {
     try {
         const { commentId } = req.params
@@ -235,7 +260,6 @@ const deleteComment = async (req, res) => {
             return res.status(404).json({ message: "Recipe not found" })
         }
 
-        // Trouver l'index du commentaire
         const commentIndex = recipe.comments.findIndex(
             comment => comment._id.toString() === commentId
         )
@@ -246,12 +270,10 @@ const deleteComment = async (req, res) => {
 
         const comment = recipe.comments[commentIndex]
 
-        // Vérifier si l'utilisateur est le propriétaire du commentaire
         if (comment.user.toString() !== req.user.id) {
             return res.status(403).json({ message: "Not authorized to delete this comment" })
         }
 
-        // Supprimer le commentaire avec splice
         recipe.comments.splice(commentIndex, 1)
         await recipe.save()
 
@@ -265,7 +287,6 @@ const deleteComment = async (req, res) => {
     }
 }
 
-// Edit Comment
 const editComment = async (req, res) => {
     try {
         const { commentId } = req.params
@@ -281,26 +302,22 @@ const editComment = async (req, res) => {
             return res.status(404).json({ message: "Recipe not found" })
         }
 
-        // Trouver le commentaire
         const comment = recipe.comments.id(commentId)
         
         if (!comment) {
             return res.status(404).json({ message: "Comment not found" })
         }
 
-        // Vérifier si l'utilisateur est le propriétaire du commentaire
         if (comment.user.toString() !== req.user.id) {
             return res.status(403).json({ message: "Not authorized to edit this comment" })
         }
 
-        // Mettre à jour le commentaire
         comment.text = text.trim()
         comment.isEdited = true
         await recipe.save()
 
-        // Populate le user
         const updatedRecipe = await Recipes.findById(req.params.id)
-            .populate("comments.user", "firstName lastName")
+            .populate("comments.user", "firstName lastName image")
         
         const updatedComment = updatedRecipe.comments.id(commentId)
 
@@ -313,40 +330,7 @@ const editComment = async (req, res) => {
         console.error("Error editing comment:", err)
         return res.status(500).json({ message: "Error editing comment" })
     }
-};
-
-// Accepter/Rejeter une recette utilisateur
-const acceptRecipe = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { isAccepted } = req.body;
-
-        const recipe = await Recipes.findByIdAndUpdate(
-            id,
-            { isAccepted },
-            { new: true }
-        ).populate("createdBy", "firstName lastName");
-
-        if (!recipe) {
-            return res.status(404).json({
-                success: false,
-                message: "Recipe not found"
-            });
-        }
-
-        return res.json({
-            success: true,
-            message: isAccepted ? "Recipe accepted successfully" : "Recipe rejected",
-            data: recipe
-        });
-    } catch (error) {
-        console.error("Error accepting recipe:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error accepting recipe"
-        });
-    }
-};
+}
 
 module.exports = {
     getRecipes, 
@@ -359,6 +343,5 @@ module.exports = {
     toggleLike,
     addComment,
     editComment,
-    deleteComment,
-    acceptRecipe
+    deleteComment
 }
