@@ -43,8 +43,8 @@ export const deleteUser = (id) => api.delete(`/users/${id}`);
 
 // === RECIPES ===
 export const getRecipes = () => api.get("/recipes");
-export const validateRecipe = (id, isOfficial) =>
-  api.put(`/recipes/${id}/validate`, { isOfficial });
+export const acceptRecipe = (id, isAccepted) =>
+  api.put(`/recipes/${id}/accept`, { isAccepted });
 export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
 export const createOfficialRecipe = (formData) => 
   api.post("/recipes/official", formData, {

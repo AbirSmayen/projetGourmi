@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getStats, getRecipes, validateRecipe, deleteRecipe } from "../services/api";
+import { getStats, getRecipes, acceptRecipe, deleteRecipe } from "../services/api";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -41,15 +41,21 @@ const Dashboard = () => {
     }
   };
 
-  const handleValidate = async (id, currentStatus) => {
-    const action = currentStatus ? "retirer le statut officiel de" : "valider";
+  const handleAccept = async (id, currentStatus, isOfficial) => {
+    // Ne pas accepter les recettes officielles
+    if (isOfficial) {
+      alert("Les recettes officielles ne peuvent pas être acceptées");
+      return;
+    }
+
+    const action = currentStatus ? "retirer l'acceptation de" : "accepter";
     if (window.confirm(`Voulez-vous ${action} cette recette ?`)) {
       try {
-        await validateRecipe(id, !currentStatus);
+        await acceptRecipe(id, !currentStatus);
         fetchRecipes();
       } catch (error) {
-        console.error("Erreur lors de la validation:", error);
-        alert("Erreur lors de la validation de la recette");
+        console.error("Erreur lors de l'acceptation:", error);
+        alert("Erreur lors de l'acceptation de la recette");
       }
     }
   };
@@ -67,12 +73,34 @@ const Dashboard = () => {
   };
 
   const getAuthorName = (recipe) => {
-    if (!recipe.createdBy) return "Anonyme";
+    if (!recipe.createdBy) return "Admin";
     const { firstName, lastName } = recipe.createdBy;
     if (firstName && lastName) return `${firstName} ${lastName}`;
     if (firstName) return firstName;
     if (lastName) return lastName;
     return "Anonyme";
+  };
+
+  const getRecipeStatus = (recipe) => {
+    if (recipe.isOfficial) {
+      return {
+        badge: "badge-primary",
+        icon: "fa-crown",
+        text: "Official"
+      };
+    }
+    if (recipe.isAccepted) {
+      return {
+        badge: "badge-success",
+        icon: "fa-check-circle",
+        text: "Accepted"
+      };
+    }
+    return {
+      badge: "badge-warning",
+      icon: "fa-clock",
+      text: "Pending"
+    };
   };
 
   // Filtrer les recettes
@@ -157,7 +185,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="col-auto">
-                    <i className="fas fa-star fa-2x text-gray-300"></i>
+                    <i className="fas fa-crown fa-2x text-gray-300"></i>
                   </div>
                 </div>
               </div>
@@ -234,53 +262,52 @@ const Dashboard = () => {
                     </thead>
                     <tbody>
                       {filteredRecipes.length > 0 ? (
-                        filteredRecipes.map((r) => (
-                          <tr key={r._id}>
-                            <td>
-                              <strong>{r.title}</strong>
-                            </td>
-                            <td>{getAuthorName(r)}</td>
-                            <td>{r.time || "Non spécifié"}</td>
-                            <td>
-                              {r.isOfficial ? (
-                                <span className="badge badge-success">
-                                  <i className="fas fa-check-circle"></i> Official
+                        filteredRecipes.map((r) => {
+                          const status = getRecipeStatus(r);
+                          return (
+                            <tr key={r._id}>
+                              <td>
+                                <strong>{r.title}</strong>
+                              </td>
+                              <td>{getAuthorName(r)}</td>
+                              <td>{r.time || "Non spécifié"}</td>
+                              <td>
+                                <span className={`badge ${status.badge}`}>
+                                  <i className={`fas ${status.icon}`}></i> {status.text}
                                 </span>
-                              ) : (
-                                <span className="badge badge-warning">
-                                  <i className="fas fa-clock"></i> User
-                                </span>
-                              )}
-                            </td>
-                            <td>{new Date(r.createdAt).toLocaleDateString('fr-FR')}</td>
-                            <td className="text-nowrap">
-                              <button
-                                onClick={() => handleValidate(r._id, r.isOfficial)}
-                                className={`btn btn-sm me-2 mb-1 ${
-                                  r.isOfficial ? 'btn-secondary' : 'btn-success'
-                                }`}
-                                title={r.isOfficial ? "Retirer le statut officiel" : "Valider comme officielle"}
-                              >
-                                {r.isOfficial ? (
-                                  <>
-                                    <i className="fas fa-times"></i> Reject
-                                  </>
-                                ) : (
-                                  <>
-                                    <i className="fas fa-check"></i> Confirm
-                                  </>
+                              </td>
+                              <td>{new Date(r.createdAt).toLocaleDateString('fr-FR')}</td>
+                              <td className="text-nowrap">
+                                {!r.isOfficial && (
+                                  <button
+                                    onClick={() => handleAccept(r._id, r.isAccepted, r.isOfficial)}
+                                    className={`btn btn-sm me-2 mb-1 ${
+                                      r.isAccepted ? 'btn-secondary' : 'btn-success'
+                                    }`}
+                                    title={r.isAccepted ? "Retirer l'acceptation" : "Accepter cette recette"}
+                                  >
+                                    {r.isAccepted ? (
+                                      <>
+                                        <i className="fas fa-times"></i> Reject
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="fas fa-check"></i> Accept
+                                      </>
+                                    )}
+                                  </button>
                                 )}
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(r._id, r.title)} 
-                                className="btn btn-danger btn-sm mb-1"
-                                title="Supprimer cette recette"
-                              >
-                                <i className="fas fa-trash"></i> Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                                <button 
+                                  onClick={() => handleDelete(r._id, r.title)} 
+                                  className="btn btn-danger btn-sm mb-1"
+                                  title="Supprimer cette recette"
+                                >
+                                  <i className="fas fa-trash"></i> Delete
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td colSpan="6" className="text-center text-muted">
