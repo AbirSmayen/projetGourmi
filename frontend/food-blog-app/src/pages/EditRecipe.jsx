@@ -26,7 +26,7 @@ export default function EditRecipe(){
       } catch (err) {
         console.error("Error loading recipe:", err)
         Swal.fire({
-          title: 'Erreur!',
+          title: 'Error!',
           text: 'Unable to load recipe.',
           icon: 'error'
         }).then(() => navigate("/myRecipe"))
@@ -69,7 +69,6 @@ export default function EditRecipe(){
         }
       })
       
-      // Utiliser SweetAlert au lieu de alert
       if (response.data.success) {
         await Swal.fire({
           title: 'Success!',
@@ -81,18 +80,40 @@ export default function EditRecipe(){
         navigate("/myRecipe")
       } else {
         Swal.fire({
-          title: 'error!',
+          title: 'Error!',
           text: response.data.message || 'Unable to modify the recipe.',
           icon: 'error'
         })
       }
     } catch (err) {
       console.error("Error updating recipe:", err)
-      Swal.fire({
-        title: 'error!',
-        text: err.response?.data?.message || 'An error has occurred.',
-        icon: 'error'
-      })
+      
+      // Vérifier si l'utilisateur est bloqué
+      if (err.response?.data?.isBlocked) {
+        Swal.fire({
+          icon: "error",
+          title: "Account Blocked",
+          html: `
+            <p style="color: #d33; font-weight: bold;">
+              <i class="fas fa-ban"></i> Your account has been blocked by an administrator.
+            </p>
+            <p>You cannot edit recipes until your account is unblocked.</p>
+            <p style="font-size: 0.9em; color: #666;">
+              Please contact support if you believe this is an error.
+            </p>
+          `,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK"
+        }).then(() => {
+          navigate("/myRecipe")
+        })
+      } else {
+        Swal.fire({
+          title: 'Error!',
+          text: err.response?.data?.message || 'An error has occurred.',
+          icon: 'error'
+        })
+      }
     } finally {
       setSubmitting(false)
     }

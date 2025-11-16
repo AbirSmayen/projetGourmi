@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import axios from "axios"
-import { FaHeart, FaRegHeart, FaComment, FaTrash, FaEdit, FaEye } from "react-icons/fa"
+import { FaHeart, FaRegHeart, FaComment, FaTrash, FaEdit, FaEye, FaBan } from "react-icons/fa"
 import Swal from "sweetalert2"
 
 export default function RecipeInteractions({ recipe, onAuthRequired, refreshRecipe }) {
@@ -14,6 +14,29 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
   
   const isLiked = recipe.likes?.includes(currentUser._id)
   const likesCount = recipe.likes?.length || 0
+
+  // Fonction pour gérer les erreurs de blocage
+  const handleBlockedError = (error) => {
+    if (error.response?.data?.isBlocked) {
+      Swal.fire({
+        icon: "error",
+        title: "Account Blocked",
+        html: `
+          <p style="color: #d33; font-weight: bold;">
+            <i class="fas fa-ban"></i> Your account has been blocked by an administrator.
+          </p>
+          <p>You cannot perform this action until your account is unblocked.</p>
+          <p style="font-size: 0.9em; color: #666;">
+            Please contact support if you believe this is an error.
+          </p>
+        `,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK"
+      })
+      return true
+    }
+    return false
+  }
 
   const handleLike = async () => {
     if (!token) {
@@ -35,63 +58,64 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
       }
     } catch (err) {
       console.error("Error liking recipe:", err)
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to like recipe"
-      })
+      
+      // Vérifier si c'est une erreur de blocage
+      if (!handleBlockedError(err)) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.response?.data?.message || "Failed to like recipe"
+        })
+      }
     }
   }
 
-  // Voir qui a liké
   const showLikers = async () => {
-  if (likesCount === 0) {
-    Swal.fire({
-      icon: "info",
-      title: "No likes yet",
-      text: "Be the first to like this recipe!"
-    })
-    return
-  }
+    if (likesCount === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "No likes yet",
+        text: "Be the first to like this recipe!"
+      })
+      return
+    }
 
-  try {
-    // Récupérer les détails complets de la recette avec les likes populés
-    const res = await axios.get(`http://localhost:5000/api/recipes/${recipe._id}`)
-    const fullRecipe = res.data
-    
-    // Créer la liste HTML des personnes qui ont liké
-    const likersList = fullRecipe.likes?.map((user) => {
-      const firstName = user.firstName || ""
-      const lastName = user.lastName || ""
-      const fullName = firstName && lastName 
-        ? `${firstName} ${lastName}` 
-        : firstName || lastName || user.email || "Anonymous User"
+    try {
+      const res = await axios.get(`http://localhost:5000/api/recipes/${recipe._id}`)
+      const fullRecipe = res.data
       
-      return `
-        <li style="text-align: left; padding: 8px 0; border-bottom: 1px solid #eee;">
-          <span style="color: #ce1212; font-weight: bold;">👤</span> 
-          ${fullName}
-        </li>
-      `
-    }).join('') || '<p>No likes data available</p>'
+      const likersList = fullRecipe.likes?.map((user) => {
+        const firstName = user.firstName || ""
+        const lastName = user.lastName || ""
+        const fullName = firstName && lastName 
+          ? `${firstName} ${lastName}` 
+          : firstName || lastName || user.email || "Anonymous User"
+        
+        return `
+          <li style="text-align: left; padding: 8px 0; border-bottom: 1px solid #eee;">
+            <span style="color: #ce1212; font-weight: bold;">👤</span> 
+            ${fullName}
+          </li>
+        `
+      }).join('') || '<p>No likes data available</p>'
 
-    Swal.fire({
-      title: `<span style="color: #ce1212;">${likesCount} ${likesCount === 1 ? 'Person' : 'People'} liked this recipe</span>`,
-      html: `<ul style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;">${likersList}</ul>`,
-      icon: "info",
-      confirmButtonColor: "#ce1212",
-      confirmButtonText: "Close",
-      width: '500px'
-    })
-  } catch (err) {
-    console.error("Error fetching likers:", err)
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Failed to load users who liked this recipe"
-    })
+      Swal.fire({
+        title: `<span style="color: #ce1212;">${likesCount} ${likesCount === 1 ? 'Person' : 'People'} liked this recipe</span>`,
+        html: `<ul style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;">${likersList}</ul>`,
+        icon: "info",
+        confirmButtonColor: "#ce1212",
+        confirmButtonText: "Close",
+        width: '500px'
+      })
+    } catch (err) {
+      console.error("Error fetching likers:", err)
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load users who liked this recipe"
+      })
+    }
   }
-}
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
@@ -128,11 +152,15 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
       }
     } catch (err) {
       console.error("Error adding comment:", err)
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to add comment"
-      })
+      
+      // Vérifier si c'est une erreur de blocage
+      if (!handleBlockedError(err)) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.response?.data?.message || "Failed to add comment"
+        })
+      }
     } finally {
       setSubmittingComment(false)
     }
@@ -170,11 +198,15 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
       }
     } catch (err) {
       console.error("Error editing comment:", err)
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to edit comment"
-      })
+      
+      // Vérifier si c'est une erreur de blocage
+      if (!handleBlockedError(err)) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.response?.data?.message || "Failed to edit comment"
+        })
+      }
     }
   }
 
@@ -215,11 +247,15 @@ export default function RecipeInteractions({ recipe, onAuthRequired, refreshReci
         }
       } catch (err) {
         console.error("Error deleting comment:", err)
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Failed to delete comment"
-        })
+        
+        // Vérifier si c'est une erreur de blocage
+        if (!handleBlockedError(err)) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: err.response?.data?.message || "Failed to delete comment"
+          })
+        }
       }
     }
   }

@@ -1,6 +1,7 @@
 import axios from "axios"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import Swal from "sweetalert2"
 
 export default function AddfoodRecipe() {
   const [recipeData, setRecipeData] = useState({
@@ -15,10 +16,8 @@ export default function AddfoodRecipe() {
 
   const onHandleChange = (e) => {
     if (e.target.name === "file") {
-      // Gérer le fichier séparément
       setFile(e.target.files[0])
     } else {
-      // Gérer les autres champs
       setRecipeData(prev => ({
         ...prev,
         [e.target.name]: e.target.value
@@ -31,7 +30,6 @@ export default function AddfoodRecipe() {
     setLoading(true)
 
     try {
-      // Créer FormData
       const formData = new FormData()
       formData.append('title', recipeData.title)
       formData.append('ingredients', recipeData.ingredients)
@@ -41,7 +39,6 @@ export default function AddfoodRecipe() {
         formData.append('file', file)
       }
 
-      // Envoyer la requête
       const token = localStorage.getItem("token")
       await axios.post("http://localhost:5000/api/recipes", formData, {
         headers: {
@@ -50,11 +47,44 @@ export default function AddfoodRecipe() {
         }
       })
 
-      alert("Recipe added successfully!")
+      await Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Recipe added successfully!",
+        timer: 2000,
+        showConfirmButton: false
+      })
+      
       navigate("/myRecipe")
     } catch (err) {
       console.error("Error:", err)
-      alert("Error adding recipe: " + (err.response?.data?.message || err.message))
+      
+      // Vérifier si l'utilisateur est bloqué
+      if (err.response?.data?.isBlocked) {
+        Swal.fire({
+          icon: "error",
+          title: "Account Blocked",
+          html: `
+            <p style="color: #d33; font-weight: bold;">
+              <i class="fas fa-ban"></i> Your account has been blocked by an administrator.
+            </p>
+            <p>You cannot add recipes until your account is unblocked.</p>
+            <p style="font-size: 0.9em; color: #666;">
+              Please contact support if you believe this is an error.
+            </p>
+          `,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK"
+        }).then(() => {
+          navigate("/")
+        })
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.response?.data?.message || "Error adding recipe"
+        })
+      }
     } finally {
       setLoading(false)
     }

@@ -6,6 +6,7 @@ import axios from 'axios'
 import AddfoodRecipe from "./pages/AddfoodRecipe";
 import EditRecipe from "./pages/EditRecipe";
 import RecipeDetails from "./pages/RecipeDetails";
+import UserProfile from "./pages/UserProfile";
 
 
 //Récupérer les données de la BD
@@ -36,8 +37,7 @@ const router=createBrowserRouter([
       {path:"/addRecipe",element:<AddfoodRecipe/>},
       {path:"/editRecipe/:id",element:<EditRecipe/>},
       {path:"/recipe/:id", element:<RecipeDetails/>},
-
-
+      {path: "/profile", element: <UserProfile /> },
   ]},
 ])
 
