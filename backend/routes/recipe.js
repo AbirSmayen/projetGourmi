@@ -1,4 +1,4 @@
-const express = require("express")
+const express = require("express");
 const { 
     getRecipes, 
     getRecipe, 
@@ -11,22 +11,29 @@ const {
     addComment,
     editComment,    
     deleteComment
-} = require("../controller/recipe")
-const verifyToken = require("../middleware/auth")
-const router = express.Router()
+} = require("../controller/recipe");
+const verifyToken = require("../middleware/auth");
+const checkIfBlocked = require("../middleware/checkIfBlocked");
+const router = express.Router();
 
-// Routes d'interaction (nécessitent authentification)
-router.post("/:id/like", verifyToken, toggleLike)
-router.post("/:id/comment", verifyToken, addComment)
-router.put("/:id/comment/:commentId", verifyToken, editComment) 
-router.delete("/:id/comment/:commentId", verifyToken, deleteComment)
+//Les routes spécifiques DOIVENT venir AVANT les routes avec paramètres dynamiques
 
-// Routes de base
-router.get("/", getRecipes)
-router.get("/my", verifyToken, getMyRecipes)
-router.get("/:id", getRecipe)
-router.post("/", upload.single('file'), verifyToken, addRecipe)
-router.put("/:id", verifyToken, upload.single('file'), editRecipe)
-router.delete("/:id", deleteRecipe)
+// Routes publiques
+router.get("/", getRecipes);
 
-module.exports = router
+// Routes protégées - METTRE /my AVANT /:id
+router.get("/my", verifyToken, checkIfBlocked, getMyRecipes);
+
+// Routes avec paramètres dynamiques (APRÈS les routes spécifiques)
+router.get("/:id", getRecipe);
+router.post("/", verifyToken, checkIfBlocked, upload.single('file'), addRecipe);
+router.put("/:id", verifyToken, checkIfBlocked, upload.single('file'), editRecipe);
+router.delete("/:id", verifyToken, checkIfBlocked, deleteRecipe);
+
+// Routes d'interaction
+router.post("/:id/like", verifyToken, checkIfBlocked, toggleLike);
+router.post("/:id/comment", verifyToken, checkIfBlocked, addComment);
+router.put("/:id/comment/:commentId", verifyToken, checkIfBlocked, editComment);
+router.delete("/:id/comment/:commentId", verifyToken, checkIfBlocked, deleteComment);
+
+module.exports = router;

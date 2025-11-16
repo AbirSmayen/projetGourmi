@@ -3,13 +3,12 @@ const router = express.Router();
 const User = require("../../models/user");
 const bcrypt = require("bcrypt");
 
-
 // Récupérer tous les utilisateurs
 router.get("/", async (req, res) => {
   try {
     const users = await User.find()
-      .select("-password") // Exclure les mots de passe
-      .sort({ createdAt: -1 }); // Les plus récents en premier
+      .select("-password") 
+      .sort({ createdAt: -1 });
     
     res.status(200).json({
       success: true,
@@ -50,65 +49,42 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Ajouter un nouvel utilisateur (par l'admin)
-router.post("/", async (req, res) => {
+// Modifier un utilisateur (NOUVELLE VERSION)
+router.put("/:id", async (req, res) => {
   try {
-    const { firstName, lastName, email, password, image } = req.body;
-
-    // Vérifier si l'email existe déjà
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
+    const { firstName, lastName, email, password, image, preferences } = req.body;
+    
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: "Cet email est déjà utilisé"
+        message: "Utilisateur introuvable"
       });
     }
 
-    // Hasher le mot de passe
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Créer le nouvel utilisateur
-    const newUser = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      image: image || 'default-avatar.png'
-    });
-
-    // Retourner sans le mot de passe
-    const userResponse = newUser.toObject();
-    delete userResponse.password;
-
-    res.status(201).json({
-      success: true,
-      message: "Utilisateur créé avec succès",
-      data: userResponse
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Erreur lors de la création de l'utilisateur",
-      error: error.message
-    });
-  }
-});
-
-// Modifier un utilisateur
-router.put("/:id", async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, image } = req.body;
+    // Vérifier si l'email est déjà utilisé par un autre utilisateur
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: req.params.id } });
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Cet email est déjà utilisé"
+        });
+      }
+    }
     
-    const updateData = {
-      firstName,
-      lastName,
-      email,
-      image
-    };
+    const updateData = {};
+    
+    // Mettre à jour seulement les champs fournis
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (email !== undefined) updateData.email = email;
+    if (image !== undefined) updateData.image = image;
+    if (preferences !== undefined) updateData.preferences = preferences;
 
     // Si un nouveau mot de passe est fourni, le hasher
-    if (password) {
+    if (password && password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(password, salt);
     }
@@ -118,13 +94,6 @@ router.put("/:id", async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     ).select("-password");
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "Utilisateur introuvable"
-      });
-    }
 
     res.status(200).json({
       success: true,
@@ -140,17 +109,79 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Supprimer un utilisateur
-router.delete("/:id", async (req, res) => {
+// Bloquer/Débloquer un utilisateur
+router.patch("/:id/block", async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    const { isBlocked } = req.body;
     
-    if (!deletedUser) {
+    // Vérifier que isBlocked est un booléen
+    if (typeof isBlocked !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "Le champ isBlocked doit être un booléen"
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "Utilisateur introuvable"
       });
     }
+
+    // Empêcher de bloquer un admin
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Impossible de bloquer un administrateur"
+      });
+    }
+
+    // Mettre à jour le statut de blocage
+    user.isBlocked = isBlocked;
+    await user.save();
+
+    // Retourner sans le mot de passe
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(200).json({
+      success: true,
+      message: isBlocked ? "Utilisateur bloqué avec succès" : "Utilisateur débloqué avec succès",
+      data: userResponse
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors du changement de statut",
+      error: error.message
+    });
+  }
+});
+
+// Supprimer un utilisateur
+router.delete("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur introuvable"
+      });
+    }
+
+    // Empêcher la suppression d'un admin
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Impossible de supprimer un administrateur"
+      });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
