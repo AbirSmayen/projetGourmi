@@ -343,5 +343,5 @@ module.exports = {
     toggleLike,
     addComment,
     editComment,
-    deleteComment
+    deleteComment,
 }

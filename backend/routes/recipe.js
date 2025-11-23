@@ -10,8 +10,9 @@ const {
     toggleLike,
     addComment,
     editComment,    
-    deleteComment
+    deleteComment,
 } = require("../controller/recipe");
+
 const verifyToken = require("../middleware/auth");
 const checkIfBlocked = require("../middleware/checkIfBlocked");
 const router = express.Router();
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // Routes publiques
 router.get("/", getRecipes);
+
 
 // Routes protégées - METTRE /my AVANT /:id
 router.get("/my", verifyToken, checkIfBlocked, getMyRecipes);
