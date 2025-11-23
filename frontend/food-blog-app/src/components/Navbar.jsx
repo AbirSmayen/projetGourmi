@@ -3,7 +3,7 @@ import Modal from "./Modal";
 import InputForm from "./InputForm";
 import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaSignOutAlt, FaRobot } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 
 export default function Navbar({ onSearch, searchQuery }) {
@@ -52,7 +52,7 @@ export default function Navbar({ onSearch, searchQuery }) {
       <header id="header" className="header d-flex align-items-center sticky-top">
         <div className="container position-relative d-flex align-items-center justify-content-between">
           <NavLink to="/" className="logo d-flex align-items-center me-auto me-xl-0">
-            <h1 className="sitename">Food Blog</h1>
+            <h1 className="sitename">Gourmi</h1>
             <span>.</span>
           </NavLink>
 
@@ -63,6 +63,39 @@ export default function Navbar({ onSearch, searchQuery }) {
                   Home
                 </NavLink>
               </li>
+              
+              {/* Lien vers le générateur IA - vérifie l'authentification */}
+              <li>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!token) {
+                      setIsOpen(true); // Ouvrir le modal de connexion
+                    } else {
+                      navigate("/ai-generator");
+                    }
+                  }}
+                  className={location.pathname === "/ai-generator" ? "active" : ""}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <FaRobot size={16} style={{ color: '#667eea' }} />
+                  <span style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontWeight: '600'
+                  }}>
+                    AI Generator
+                  </span>
+                </a>
+              </li>
+
               {!isLogin && (
                 <li>
                   <NavLink
